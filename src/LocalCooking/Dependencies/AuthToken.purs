@@ -9,6 +9,8 @@ import Facebook.Types (FacebookUserId, FacebookLoginReturnError)
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Newtype (unwrap, wrap)
+import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
+import Control.Alternative ((<|>))
 
 
 
@@ -20,6 +22,12 @@ data AuthTokenInitIn
 instance accessTokenInitInAuthTokenInitIn :: AccessTokenInitIn AuthTokenInitIn where
   makeExists = AuthTokenInitInExists <<< wrap
 
+instance encodeJsonAuthTokenInitIn :: EncodeJson AuthTokenInitIn where
+  encodeJson x = case x of
+    AuthTokenInitInLogin y -> "login" := y ~> jsonEmptyObject
+    AuthTokenInitInSocialLogin y -> "socialLogin" := y ~> jsonEmptyObject
+    AuthTokenInitInExists y -> "exists" := y ~> jsonEmptyObject
+
 
 data AuthTokenFailure
   = FBLoginReturnBad String String
@@ -28,6 +36,34 @@ data AuthTokenFailure
   | FBLoginReturnNoUser FacebookUserId
   | FBLoginReturnError FacebookLoginReturnError
   | AuthTokenLoginFailure
+
+instance decodeJsonAuthTokenFailure :: DecodeJson AuthTokenFailure where
+  decodeJson json = do
+    let obj = do
+          o <- decodeJson json
+          let fbBad = do
+                o' <- o .? "fbBad"
+                code <- o' .? "code"
+                msg <- o .? "msg"
+                pure $ FBLoginReturnBad code msg
+              fbDenied = do
+                o' <- o .? "fbDenied"
+                desc <- o' .? "desc"
+                pure $ FBLoginReturnDenied desc
+              fbNoUser = do
+                x <- o .? "no-user"
+                pure $ FBLoginReturnNoUser x
+              fbReturn = do
+                x <- o .? "fbLoginReturnError"
+                pure $ FBLoginReturnError x
+          fbBad <|> fbDenied <|> fbNoUser <|> fbReturn
+        str = do
+          s <- decodeJson json
+          case unit of
+            _ | s == "bad-parse" -> pure FBLoginReturnBadParse
+              | s == "loginFailure" -> pure AuthTokenLoginFailure
+              | otherwise -> fail "Not a AuthTokenFailure"
+    obj <|> str
 
 
 data AuthTokenInitOut
