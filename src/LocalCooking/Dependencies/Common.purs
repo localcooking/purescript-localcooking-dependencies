@@ -14,3 +14,6 @@ type RegisterSparrowClientQueues eff =
 
 type GetUserSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) User
+
+type SetUserSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken User) JSONUnit
