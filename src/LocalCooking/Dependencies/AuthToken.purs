@@ -8,8 +8,9 @@ import Facebook.Types (FacebookUserId, FacebookLoginReturnError)
 
 import Prelude
 import Data.Maybe (Maybe (..))
+import Data.Either (Either (..))
 import Data.Newtype (unwrap, wrap)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
+import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail, encodeJson)
 import Control.Alternative ((<|>))
 
 
@@ -66,6 +67,22 @@ instance decodeJsonAuthTokenFailure :: DecodeJson AuthTokenFailure where
     obj <|> str
 
 
+newtype PreliminaryAuthToken = PreliminaryAuthToken
+  (Maybe (Either AuthTokenFailure AuthToken))
+
+instance decodeJsonPreliminaryAuthToken :: DecodeJson PreliminaryAuthToken where
+  decodeJson json = do
+    mO <- decodeJson json
+    case mO of
+      Nothing -> pure (PreliminaryAuthToken Nothing)
+      Just o -> do
+        let err = PreliminaryAuthToken <<< Just <<< Left <$> o .? "err"
+            token = PreliminaryAuthToken <<< Just <<< Right <$> o .? "token"
+        err <|> token
+        
+
+
+
 data AuthTokenInitOut
   = AuthTokenInitOutSuccess AuthToken
   | AuthTokenInitOutFailure AuthTokenFailure
@@ -78,9 +95,21 @@ instance accessTokenInitOutAuthTokenInitOut :: AccessTokenInitOut AuthTokenInitO
     AuthTokenInitOutFailure y -> Just y
     _ -> Nothing
 
+instance decodeJsonAuthTokenInitOut :: DecodeJson AuthTokenInitOut where
+  decodeJson json = do
+    o <- decodeJson json
+    let f = AuthTokenInitOutFailure <$> o .? "failure"
+        s = AuthTokenInitOutSuccess <$> o .? "success"
+    f <|> s
+
+
 
 data AuthTokenDeltaIn
   = AuthTokenDeltaInLogout
+
+instance encodeJsonAuthTokenDeltaIn :: EncodeJson AuthTokenDeltaIn where
+  encodeJson AuthTokenDeltaInLogout = encodeJson "logout"
+
 
 
 data AuthTokenDeltaOut
@@ -90,3 +119,10 @@ instance accessTokenDeltaOutAuthTokenDeltaOut :: AccessTokenDeltaOut AuthTokenDe
   getRevoke x = case x of
     AuthTokenDeltaOutRevoked -> true
     _ -> false
+
+instance decodeJsonAuthTokenDeltaOut :: DecodeJson AuthTokenDeltaOut where
+  decodeJson json = do
+    s <- decodeJson json
+    case unit of
+      _ | s == "revoke" -> pure AuthTokenDeltaOutRevoked
+        | otherwise -> fail "AuthTokenDeltaOut"
