@@ -6,6 +6,7 @@ import LocalCooking.Semantics.Common (Login, SocialLogin)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import Facebook.Types (FacebookUserId, FacebookLoginReturnError)
 
+import Sparrow.Client.Queue (SparrowClientQueues)
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Either (Either (..))
@@ -126,3 +127,8 @@ instance decodeJsonAuthTokenDeltaOut :: DecodeJson AuthTokenDeltaOut where
     case unit of
       _ | s == "revoke" -> pure AuthTokenDeltaOutRevoked
         | otherwise -> fail "AuthTokenDeltaOut"
+
+
+
+type AuthTokenSparrowClientQueues eff =
+  SparrowClientQueues eff AuthTokenInitIn AuthTokenInitOut AuthTokenDeltaIn AuthTokenDeltaOut
