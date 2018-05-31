@@ -5,7 +5,8 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.Rating (Rating)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Mitch
-  ( Customer, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef, Review)
+  ( Customer, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
+  , Review, CartEntry)
 import LocalCooking.Database.Schema
   ( StoredOrderId, StoredReviewId, StoredMealId, StoredMenuId, StoredChefId)
 
@@ -88,3 +89,31 @@ instance encodeJsonBrowseMenu :: EncodeJson BrowseMenu where
     =  "chef" := chef
     ~> "deadline" := JSONDate deadline
     ~> jsonEmptyObject
+
+
+type BrowseMenuSparrowClientQueues eff =
+  SparrowStaticClientQueues eff BrowseMenu Menu
+
+
+newtype BrowseMeal = BrowseMeal
+  { chef :: Permalink
+  , deadline :: Date
+  , meal :: Permalink
+  }
+
+derive instance genericBrowseMeal :: Generic BrowseMeal
+
+instance encodeJsonBrowseMeal :: EncodeJson BrowseMeal where
+  encodeJson (BrowseMeal {chef,deadline,meal})
+    =  "chef" := chef
+    ~> "deadline" := JSONDate deadline
+    ~> "meal" := meal
+    ~> jsonEmptyObject
+
+
+type BrowseMealSparrowClientQueues eff =
+  SparrowStaticClientQueues eff BrowseMeal Meal
+
+
+type GetCartSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) (Array CartEntry)
