@@ -43,6 +43,8 @@ adminDependencies :: forall eff stM m
                   -> SparrowClientT (Effects eff) m Unit
 adminDependencies {getUsersQueues,setUserQueues,newUserQueues} = do
   unpackClient (Topic ["admin","getUsers"]) (sparrowStaticClientQueues getUsersQueues)
+  unpackClient (Topic ["admin","setUser"]) (sparrowStaticClientQueues setUserQueues)
+  unpackClient (Topic ["admin","newUser"]) (sparrowStaticClientQueues newUserQueues)
 
 
 type GetUsersSparrowClientQueues eff =
