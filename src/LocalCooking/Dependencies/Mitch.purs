@@ -10,8 +10,12 @@ import LocalCooking.Semantics.Mitch
 import LocalCooking.Database.Schema
   ( StoredOrderId, StoredReviewId, StoredMealId, StoredMenuId, StoredChefId)
 
-import Sparrow.Client.Queue (SparrowStaticClientQueues)
+import Sparrow.Client (unpackClient)
+import Sparrow.Client.Types (SparrowClientT)
+import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues)
+import Sparrow.Types (Topic (..))
 
+import Prelude
 import Data.Image.Source (ImageSource)
 import Data.Date (Date)
 import Data.Date.JSON (JSONDate (..))
@@ -20,7 +24,72 @@ import Data.String.Markdown (MarkdownText)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
 import Data.Generic (class Generic)
+import Data.Functor.Singleton (class SingletonFunctor)
+import Control.Monad.Trans.Control (class MonadBaseControl)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Class (class MonadEff)
+import Control.Monad.Eff.Exception (EXCEPTION)
 import Text.Email.Validate (EmailAddress)
+
+
+
+type Effects eff =
+  ( ref :: REF
+  , exception :: EXCEPTION
+  | eff)
+
+
+adminDependencies :: forall eff stM m
+                   . MonadBaseControl (Eff (Effects eff)) m stM
+                  => MonadEff (Effects eff) m
+                  => SingletonFunctor stM
+                  => { setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , submitReviewQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getReviewQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getMealSynopsisQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getChefSynopsisQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getChefMenuSynopsesQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getMenuMealSynopsesQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , browseChefQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , browseMenuQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , browseMealQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getCartQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , addToCartQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     , getOrdersQueues :: SetCustomerSparrowClientQueues (Effects eff)
+                     }
+                  -> SparrowClientT (Effects eff) m Unit
+adminDependencies
+  { setCustomerQueues
+  , getCustomerQueues
+  , submitReviewQueues
+  , getReviewQueues
+  , getMealSynopsisQueues
+  , getChefSynopsisQueues
+  , getChefMenuSynopsesQueues
+  , getMenuMealSynopsesQueues
+  , browseChefQueues
+  , browseMenuQueues
+  , browseMealQueues
+  , getCartQueues
+  , addToCartQueues
+  , getOrdersQueues
+  } = do
+  unpackClient (Topic ["mitch","setCustomer"]) (sparrowStaticClientQueues setCustomerQueues)
+  unpackClient (Topic ["mitch","getCustomer"]) (sparrowStaticClientQueues getCustomerQueues)
+  unpackClient (Topic ["mitch","submitReview"]) (sparrowStaticClientQueues submitReviewQueues)
+  unpackClient (Topic ["mitch","getReview"]) (sparrowStaticClientQueues getReviewQueues)
+  unpackClient (Topic ["mitch","getMealSynopsis"]) (sparrowStaticClientQueues getMealSynopsisQueues)
+  unpackClient (Topic ["mitch","getChefSynopsis"]) (sparrowStaticClientQueues getChefSynopsisQueues)
+  unpackClient (Topic ["mitch","getChefMenuSynopses"]) (sparrowStaticClientQueues getChefMenuSynopsesQueues)
+  unpackClient (Topic ["mitch","getMenuMealSynopses"]) (sparrowStaticClientQueues getMenuMealSynopsesQueues)
+  unpackClient (Topic ["mitch","browseChef"]) (sparrowStaticClientQueues browseChefQueues)
+  unpackClient (Topic ["mitch","browseMenu"]) (sparrowStaticClientQueues browseMenuQueues)
+  unpackClient (Topic ["mitch","browseMeal"]) (sparrowStaticClientQueues browseMealQueues)
+  unpackClient (Topic ["mitch","getCart"]) (sparrowStaticClientQueues getCartQueues)
+  unpackClient (Topic ["mitch","addToCart"]) (sparrowStaticClientQueues addToCartQueues)
+  unpackClient (Topic ["mitch","getOrders"]) (sparrowStaticClientQueues getOrdersQueues)
 
 
 type SetCustomerSparrowClientQueues eff =
