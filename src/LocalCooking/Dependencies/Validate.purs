@@ -1,15 +1,54 @@
 module LocalCooking.Dependencies.Validate where
 
 
-import Sparrow.Client.Queue (SparrowStaticClientQueues)
+import Sparrow.Client (unpackClient)
+import Sparrow.Client.Types (SparrowClientT)
+import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues)
+import Sparrow.Types (Topic (..))
 
+import Prelude
 import Data.Date (Date)
 import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
 import Data.Generic (class Generic)
+import Data.Functor.Singleton (class SingletonFunctor)
+import Control.Monad.Trans.Control (class MonadBaseControl)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Class (class MonadEff)
+import Control.Monad.Eff.Exception (EXCEPTION)
 import Text.Email.Validate (EmailAddress)
+
+
+
+type Effects eff =
+  ( ref :: REF
+  , exception :: EXCEPTION
+  | eff)
+
+
+validateDependencies :: forall eff stM m
+                      . MonadBaseControl (Eff (Effects eff)) m stM
+                     => MonadEff (Effects eff) m
+                     => SingletonFunctor stM
+                     => { uniqueEmailQueues :: UniqueEmailSparrowClientQueues (Effects eff)
+                        , uniqueChefPermalinkQueues :: UniqueChefPermalinkSparrowClientQueues (Effects eff)
+                        , uniqueMenuDeadlineQueues :: UniqueMenuDeadlineSparrowClientQueues (Effects eff)
+                        , uniqueMealPermalinkQueues :: UniqueMealPermalinkSparrowClientQueues (Effects eff)
+                        }
+                     -> SparrowClientT (Effects eff) m Unit
+validateDependencies
+  { uniqueEmailQueues
+  , uniqueChefPermalinkQueues
+  , uniqueMenuDeadlineQueues
+  , uniqueMealPermalinkQueues
+  } = do
+  unpackClient (Topic ["validate","uniqueEmail"]) (sparrowStaticClientQueues uniqueEmailQueues)
+  unpackClient (Topic ["validate","uniqueChefPermalink"]) (sparrowStaticClientQueues uniqueChefPermalinkQueues)
+  unpackClient (Topic ["validate","uniqueMenuDeadline"]) (sparrowStaticClientQueues uniqueMenuDeadlineQueues)
+  unpackClient (Topic ["validate","uniqueMealPermalink"]) (sparrowStaticClientQueues uniqueMealPermalinkQueues)
 
 
 type UniqueEmailSparrowClientQueues eff =
@@ -49,5 +88,5 @@ instance encodeJsonIsUniqueMealPermalink :: EncodeJson IsUniqueMealPermalink whe
     ~> "meal" := meal
     ~> jsonEmptyObject
 
-type UniqueMealDeadlineSparrowClientQueues eff =
+type UniqueMealPermalinkSparrowClientQueues eff =
   SparrowStaticClientQueues eff IsUniqueMealPermalink JSONUnit
