@@ -8,6 +8,7 @@ import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
+import Data.Generic (class Generic)
 import Text.Email.Validate (EmailAddress)
 
 
@@ -21,6 +22,8 @@ newtype IsUniqueMenuDeadline = IsUniqueMenuDeadline
   { chef :: Permalink
   , deadline :: Date
   }
+
+derive instance genericIsUniqueMenuDeadline :: Generic IsUniqueMenuDeadline
 
 instance encodeJsonIsUniqueMenuDeadline :: EncodeJson IsUniqueMenuDeadline where
   encodeJson (IsUniqueMenuDeadline {chef,deadline})
@@ -37,7 +40,7 @@ newtype IsUniqueMealPermalink = IsUniqueMealPermalink
   , meal :: Permalink
   }
 
--- TODO FIXME prove isomorphic caps
+-- TODO FIXME prove isomorphic
 
 instance encodeJsonIsUniqueMealPermalink :: EncodeJson IsUniqueMealPermalink where
   encodeJson (IsUniqueMealPermalink {chef,deadline,meal})
