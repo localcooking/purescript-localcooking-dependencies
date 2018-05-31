@@ -3,7 +3,7 @@ module LocalCooking.Dependencies.Validate where
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues)
+import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -29,15 +29,33 @@ type Effects eff =
   | eff)
 
 
+type ValidateQueues eff =
+  { uniqueEmailQueues :: UniqueEmailSparrowClientQueues eff
+  , uniqueChefPermalinkQueues :: UniqueChefPermalinkSparrowClientQueues eff
+  , uniqueMenuDeadlineQueues :: UniqueMenuDeadlineSparrowClientQueues eff
+  , uniqueMealPermalinkQueues :: UniqueMealPermalinkSparrowClientQueues eff
+  }
+
+
+newValidateQueues :: forall eff. Eff (Effects eff) (ValidateQueues (Effects eff))
+newValidateQueues = do
+  uniqueEmailQueues <- newSparrowStaticClientQueues
+  uniqueChefPermalinkQueues <- newSparrowStaticClientQueues
+  uniqueMenuDeadlineQueues <- newSparrowStaticClientQueues
+  uniqueMealPermalinkQueues <- newSparrowStaticClientQueues
+  pure
+    { uniqueEmailQueues
+    , uniqueChefPermalinkQueues
+    , uniqueMenuDeadlineQueues
+    , uniqueMealPermalinkQueues
+    }
+
+
 validateDependencies :: forall eff stM m
                       . MonadBaseControl (Eff (Effects eff)) m stM
                      => MonadEff (Effects eff) m
                      => SingletonFunctor stM
-                     => { uniqueEmailQueues :: UniqueEmailSparrowClientQueues (Effects eff)
-                        , uniqueChefPermalinkQueues :: UniqueChefPermalinkSparrowClientQueues (Effects eff)
-                        , uniqueMenuDeadlineQueues :: UniqueMenuDeadlineSparrowClientQueues (Effects eff)
-                        , uniqueMealPermalinkQueues :: UniqueMealPermalinkSparrowClientQueues (Effects eff)
-                        }
+                     => ValidateQueues (Effects eff)
                      -> SparrowClientT (Effects eff) m Unit
 validateDependencies
   { uniqueEmailQueues
