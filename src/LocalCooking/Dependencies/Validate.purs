@@ -38,6 +38,7 @@ type ValidateQueues eff =
   , uniqueMenuDeadlineQueues :: UniqueMenuDeadlineSparrowClientQueues eff
   , uniqueMealPermalinkQueues :: UniqueMealPermalinkSparrowClientQueues eff
   , passwordVerifyQueues :: PasswordVerifySparrowClientQueues eff
+  , passwordVerifyUnauthQueues :: PasswordVerifyUnauthSparrowClientQueues eff
   }
 
 
@@ -48,12 +49,14 @@ newValidateQueues = do
   uniqueMenuDeadlineQueues <- newSparrowStaticClientQueues
   uniqueMealPermalinkQueues <- newSparrowStaticClientQueues
   passwordVerifyQueues <- newSparrowStaticClientQueues
+  passwordVerifyUnauthQueues <- newSparrowStaticClientQueues
   pure
     { uniqueEmailQueues
     , uniqueChefPermalinkQueues
     , uniqueMenuDeadlineQueues
     , uniqueMealPermalinkQueues
     , passwordVerifyQueues
+    , passwordVerifyUnauthQueues
     }
 
 
@@ -69,12 +72,14 @@ validateDependencies
   , uniqueMenuDeadlineQueues
   , uniqueMealPermalinkQueues
   , passwordVerifyQueues
+  , passwordVerifyUnauthQueues
   } = do
   unpackClient (Topic ["validate","uniqueEmail"]) (sparrowStaticClientQueues uniqueEmailQueues)
   unpackClient (Topic ["validate","uniqueChefPermalink"]) (sparrowStaticClientQueues uniqueChefPermalinkQueues)
   unpackClient (Topic ["validate","uniqueMenuDeadline"]) (sparrowStaticClientQueues uniqueMenuDeadlineQueues)
   unpackClient (Topic ["validate","uniqueMealPermalink"]) (sparrowStaticClientQueues uniqueMealPermalinkQueues)
   unpackClient (Topic ["validate","passwordVerify"]) (sparrowStaticClientQueues passwordVerifyQueues)
+  unpackClient (Topic ["validate","passwordVerifyUnauth"]) (sparrowStaticClientQueues passwordVerifyUnauthQueues)
 
 
 type UniqueEmailSparrowClientQueues eff =
