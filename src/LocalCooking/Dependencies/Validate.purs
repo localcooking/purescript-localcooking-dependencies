@@ -1,5 +1,8 @@
 module LocalCooking.Dependencies.Validate where
 
+import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
+import LocalCooking.Common.User.Password (HashedPassword)
+import LocalCooking.Common.AccessToken.Auth (AuthToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -34,6 +37,7 @@ type ValidateQueues eff =
   , uniqueChefPermalinkQueues :: UniqueChefPermalinkSparrowClientQueues eff
   , uniqueMenuDeadlineQueues :: UniqueMenuDeadlineSparrowClientQueues eff
   , uniqueMealPermalinkQueues :: UniqueMealPermalinkSparrowClientQueues eff
+  , passwordVerifyQueues :: PasswordVerifySparrowClientQueues eff
   }
 
 
@@ -43,11 +47,13 @@ newValidateQueues = do
   uniqueChefPermalinkQueues <- newSparrowStaticClientQueues
   uniqueMenuDeadlineQueues <- newSparrowStaticClientQueues
   uniqueMealPermalinkQueues <- newSparrowStaticClientQueues
+  passwordVerifyQueues <- newSparrowStaticClientQueues
   pure
     { uniqueEmailQueues
     , uniqueChefPermalinkQueues
     , uniqueMenuDeadlineQueues
     , uniqueMealPermalinkQueues
+    , passwordVerifyQueues
     }
 
 
@@ -62,11 +68,13 @@ validateDependencies
   , uniqueChefPermalinkQueues
   , uniqueMenuDeadlineQueues
   , uniqueMealPermalinkQueues
+  , passwordVerifyQueues
   } = do
   unpackClient (Topic ["validate","uniqueEmail"]) (sparrowStaticClientQueues uniqueEmailQueues)
   unpackClient (Topic ["validate","uniqueChefPermalink"]) (sparrowStaticClientQueues uniqueChefPermalinkQueues)
   unpackClient (Topic ["validate","uniqueMenuDeadline"]) (sparrowStaticClientQueues uniqueMenuDeadlineQueues)
   unpackClient (Topic ["validate","uniqueMealPermalink"]) (sparrowStaticClientQueues uniqueMealPermalinkQueues)
+  unpackClient (Topic ["validate","passwordVerify"]) (sparrowStaticClientQueues passwordVerifyQueues)
 
 
 type UniqueEmailSparrowClientQueues eff =
@@ -108,3 +116,7 @@ instance encodeJsonIsUniqueMealPermalink :: EncodeJson IsUniqueMealPermalink whe
 
 type UniqueMealPermalinkSparrowClientQueues eff =
   SparrowStaticClientQueues eff IsUniqueMealPermalink JSONUnit
+
+
+type PasswordVerifySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken HashedPassword) JSONUnit
