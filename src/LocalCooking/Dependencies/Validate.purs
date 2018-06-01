@@ -120,3 +120,21 @@ type UniqueMealPermalinkSparrowClientQueues eff =
 
 type PasswordVerifySparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken HashedPassword) JSONUnit
+
+
+newtype PasswordVerifyUnauth = PasswordVerifyUnauth
+  { email :: EmailAddress
+  , password :: HashedPassword
+  }
+
+derive instance genericPasswordVerifyUnauth :: Generic PasswordVerifyUnauth
+
+instance encodeJsonPasswordVerifyUnauth :: EncodeJson PasswordVerifyUnauth where
+  encodeJson (PasswordVerifyUnauth {email,password})
+    =  "email" := email
+    ~> "password" := password
+    ~> jsonEmptyObject
+
+
+type PasswordVerifyUnauthSparrowClientQueues eff =
+  SparrowStaticClientQueues eff PasswordVerifyUnauth JSONUnit
