@@ -8,7 +8,7 @@ import Facebook.Types (FacebookUserId, FacebookLoginReturnError)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowClientQueues, sparrowClientQueues)
+import Sparrow.Client.Queue (SparrowClientQueues, sparrowClientQueues, newSparrowClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -30,13 +30,24 @@ type Effects eff =
   , exception :: EXCEPTION
   | eff)
 
+type AuthTokenQueues eff =
+  { authTokenQueues :: AuthTokenSparrowClientQueues eff
+  }
+
+
+newAuthTokenQueues :: forall eff. Eff (Effects eff) (AuthTokenQueues (Effects eff))
+newAuthTokenQueues = do
+  authTokenQueues <- newSparrowClientQueues
+  pure
+    { authTokenQueues
+    }
+
 
 authTokenDependencies :: forall eff stM m
                        . MonadBaseControl (Eff (Effects eff)) m stM
                       => MonadEff (Effects eff) m
                       => SingletonFunctor stM
-                      => { authTokenQueues :: AuthTokenSparrowClientQueues (Effects eff)
-                         }
+                      => AuthTokenQueues (Effects eff)
                       -> SparrowClientT (Effects eff) m Unit
 authTokenDependencies {authTokenQueues} = do
   unpackClient (Topic ["authToken"]) (sparrowClientQueues authTokenQueues)
