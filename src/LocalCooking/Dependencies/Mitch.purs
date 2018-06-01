@@ -40,25 +40,30 @@ type Effects eff =
   | eff)
 
 
+type AdminQueues eff =
+  { setCustomerQueues :: SetCustomerSparrowClientQueues eff
+  , getCustomerQueues :: SetCustomerSparrowClientQueues eff
+  , submitReviewQueues :: SetCustomerSparrowClientQueues eff
+  , getReviewQueues :: SetCustomerSparrowClientQueues eff
+  , getMealSynopsisQueues :: SetCustomerSparrowClientQueues eff
+  , getChefSynopsisQueues :: SetCustomerSparrowClientQueues eff
+  , getChefMenuSynopsesQueues :: SetCustomerSparrowClientQueues eff
+  , getMenuMealSynopsesQueues :: SetCustomerSparrowClientQueues eff
+  , browseChefQueues :: SetCustomerSparrowClientQueues eff
+  , browseMenuQueues :: SetCustomerSparrowClientQueues eff
+  , browseMealQueues :: SetCustomerSparrowClientQueues eff
+  , getCartQueues :: SetCustomerSparrowClientQueues eff
+  , addToCartQueues :: SetCustomerSparrowClientQueues eff
+  , getOrdersQueues :: SetCustomerSparrowClientQueues eff
+  }
+
+
+
 adminDependencies :: forall eff stM m
                    . MonadBaseControl (Eff (Effects eff)) m stM
                   => MonadEff (Effects eff) m
                   => SingletonFunctor stM
-                  => { setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , submitReviewQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getReviewQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getMealSynopsisQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getChefSynopsisQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getChefMenuSynopsesQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getMenuMealSynopsesQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , browseChefQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , browseMenuQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , browseMealQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getCartQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , addToCartQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     , getOrdersQueues :: SetCustomerSparrowClientQueues (Effects eff)
-                     }
+                  => AdminQueues (Effects eff)
                   -> SparrowClientT (Effects eff) m Unit
 adminDependencies
   { setCustomerQueues
