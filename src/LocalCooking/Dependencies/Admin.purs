@@ -6,7 +6,7 @@ import LocalCooking.Semantics.Common (User, Register)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues)
+import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -31,15 +31,30 @@ type Effects eff =
   , exception :: EXCEPTION
   | eff)
 
+type AdminQueues eff =
+  { getUsersQueues :: GetUsersSparrowClientQueues eff
+  , setUserQueues :: SetUserSparrowClientQueues eff
+  , newUserQueues :: NewUserSparrowClientQueues eff
+  }
+
+
+newAdminQueues :: forall eff. Eff (Effects eff) (AdminQueues (Effects eff))
+newAdminQueues = do
+  getUsersQueues <- newSparrowStaticClientQueues
+  setUserQueues <- newSparrowStaticClientQueues
+  newUserQueues <- newSparrowStaticClientQueues
+  pure
+    { getUsersQueues
+    , setUserQueues
+    , newUserQueues
+    }
+
 
 adminDependencies :: forall eff stM m
                    . MonadBaseControl (Eff (Effects eff)) m stM
                   => MonadEff (Effects eff) m
                   => SingletonFunctor stM
-                  => { getUsersQueues :: GetUsersSparrowClientQueues (Effects eff)
-                     , setUserQueues  :: SetUserSparrowClientQueues (Effects eff)
-                     , newUserQueues  :: NewUserSparrowClientQueues (Effects eff)
-                     }
+                  => AdminQueues (Effects eff)
                   -> SparrowClientT (Effects eff) m Unit
 adminDependencies {getUsersQueues,setUserQueues,newUserQueues} = do
   unpackClient (Topic ["admin","getUsers"]) (sparrowStaticClientQueues getUsersQueues)
