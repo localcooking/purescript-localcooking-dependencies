@@ -7,10 +7,9 @@
     "output"
   ],
   "dependencies": {
-    "purescript-localcooking-shared": "git@git.localcooking.com:localcooking/purescript-localcooking-shared.git#4d4eda830d8a480b597cbe1b510ae776777af9d1",
+    "purescript-localcooking-shared": "git@git.localcooking.com:localcooking/purescript-localcooking-shared.git#ca7e207cbbaee427fbca2e58727e73e55f256d8c",
     "purescript-sparrow-queue": "git@git.localcooking.com:tooling/purescript-sparrow-queue.git#c99dd5cfa80553329fb396469002bd1f01b5b7bc",
     "purescript-prelude": "^3.1.1",
-    "purescript-now": "3.x",
     "purescript-console": "^3.0.0"
   },
   "devDependencies": {
@@ -18,6 +17,7 @@
   },
   "resolutions": {
     "purescript-uuid": "2e563284ee5c41d75bf9010de3c4cded9f0223db",
-    "purescript-arraybuffer-types": "^2.0.0"
+    "purescript-arraybuffer-types": "^2.0.0",
+    "purescript-uri": "b691d85496680c9863a14d11cdf65b8f999272cc"
   }
 }
