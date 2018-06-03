@@ -17,6 +17,7 @@ import Data.Either (Either (..))
 import Data.Newtype (unwrap, wrap)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail, encodeJson)
 import Data.Functor.Singleton (class SingletonFunctor)
+import Data.Generic (class Generic, gShow)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff)
@@ -75,6 +76,11 @@ data AuthTokenFailure
   | FBLoginReturnNoUser FacebookUserId
   | FBLoginReturnError FacebookLoginReturnError
   | AuthTokenLoginFailure
+
+derive instance genericAuthTokenFailure :: Generic AuthTokenFailure
+
+instance showAuthTokenFailure :: Show AuthTokenFailure where
+  show = gShow
 
 instance decodeJsonAuthTokenFailure :: DecodeJson AuthTokenFailure where
   decodeJson json = do
