@@ -4,25 +4,15 @@ import LocalCooking.Dependencies.AuthToken (authTokenDependencies, AuthTokenQueu
 import LocalCooking.Dependencies.Validate (validateDependencies, ValidateQueues, newValidateQueues)
 import LocalCooking.Dependencies.Common (commonDependencies, CommonQueues, newCommonQueues)
 
-import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
-import Sparrow.Types (Topic (..))
 
 import Prelude
-import Data.Date (Date)
-import Data.Date.JSON (JSONDate (..))
-import Data.String.Permalink (Permalink)
-import Data.Argonaut.JSONUnit (JSONUnit)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
-import Data.Generic (class Generic)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Text.Email.Validate (EmailAddress)
 
 
 

@@ -4,8 +4,7 @@ import LocalCooking.Dependencies.AccessToken.Generic
   (class AccessTokenInitIn, class AccessTokenInitOut, class AccessTokenDeltaOut)
 import LocalCooking.Semantics.Common (Login, SocialLogin)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Global.Error (AuthTokenFailure (..))
-import Facebook.Types (FacebookUserId, FacebookLoginReturnError)
+import LocalCooking.Global.Error (AuthTokenFailure)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -18,7 +17,6 @@ import Data.Either (Either (..))
 import Data.Newtype (unwrap, wrap)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail, encodeJson)
 import Data.Functor.Singleton (class SingletonFunctor)
-import Data.Generic (class Generic, gShow)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff)
@@ -121,7 +119,6 @@ data AuthTokenDeltaOut
 instance accessTokenDeltaOutAuthTokenDeltaOut :: AccessTokenDeltaOut AuthTokenDeltaOut where
   getRevoke x = case x of
     AuthTokenDeltaOutRevoked -> true
-    _ -> false
 
 instance decodeJsonAuthTokenDeltaOut :: DecodeJson AuthTokenDeltaOut where
   decodeJson json = do

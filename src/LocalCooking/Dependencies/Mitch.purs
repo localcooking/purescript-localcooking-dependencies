@@ -30,7 +30,6 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Text.Email.Validate (EmailAddress)
 
 
 
