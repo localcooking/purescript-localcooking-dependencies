@@ -12,7 +12,7 @@ import LocalCooking.Database.Schema
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues)
+import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -57,14 +57,47 @@ type MitchQueues eff =
   }
 
 
+newMitchQueues :: forall eff. Eff (Effects eff) (MitchQueues (Effects eff))
+newMitchQueues = do
+  setCustomerQueues <- newSparrowStaticClientQueues
+  getCustomerQueues <- newSparrowStaticClientQueues
+  submitReviewQueues <- newSparrowStaticClientQueues
+  getReviewQueues <- newSparrowStaticClientQueues
+  getMealSynopsisQueues <- newSparrowStaticClientQueues
+  getChefSynopsisQueues <- newSparrowStaticClientQueues
+  getChefMenuSynopsesQueues <- newSparrowStaticClientQueues
+  getMenuMealSynopsesQueues <- newSparrowStaticClientQueues
+  browseChefQueues <- newSparrowStaticClientQueues
+  browseMenuQueues <- newSparrowStaticClientQueues
+  browseMealQueues <- newSparrowStaticClientQueues
+  getCartQueues <- newSparrowStaticClientQueues
+  addToCartQueues <- newSparrowStaticClientQueues
+  getOrdersQueues <- newSparrowStaticClientQueues
+  pure
+    { setCustomerQueues
+    , getCustomerQueues
+    , submitReviewQueues
+    , getReviewQueues
+    , getMealSynopsisQueues
+    , getChefSynopsisQueues
+    , getChefMenuSynopsesQueues
+    , getMenuMealSynopsesQueues
+    , browseChefQueues
+    , browseMenuQueues
+    , browseMealQueues
+    , getCartQueues
+    , addToCartQueues
+    , getOrdersQueues
+    }
 
-adminDependencies :: forall eff stM m
+
+mitchDependencies :: forall eff stM m
                    . MonadBaseControl (Eff (Effects eff)) m stM
                   => MonadEff (Effects eff) m
                   => SingletonFunctor stM
                   => MitchQueues (Effects eff)
                   -> SparrowClientT (Effects eff) m Unit
-adminDependencies
+mitchDependencies
   { setCustomerQueues
   , getCustomerQueues
   , submitReviewQueues
