@@ -39,7 +39,7 @@ type Effects eff =
   | eff)
 
 
-type AdminQueues eff =
+type MitchQueues eff =
   { setCustomerQueues :: SetCustomerSparrowClientQueues eff
   , getCustomerQueues :: SetCustomerSparrowClientQueues eff
   , submitReviewQueues :: SetCustomerSparrowClientQueues eff
@@ -62,7 +62,7 @@ adminDependencies :: forall eff stM m
                    . MonadBaseControl (Eff (Effects eff)) m stM
                   => MonadEff (Effects eff) m
                   => SingletonFunctor stM
-                  => AdminQueues (Effects eff)
+                  => MitchQueues (Effects eff)
                   -> SparrowClientT (Effects eff) m Unit
 adminDependencies
   { setCustomerQueues
