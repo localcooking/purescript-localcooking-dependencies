@@ -14,6 +14,7 @@ import Sparrow.Types (Topic (..))
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Either (Either (..))
+import Data.Generic (class Generic)
 import Data.Newtype (unwrap, wrap)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail, encodeJson)
 import Data.Functor.Singleton (class SingletonFunctor)
@@ -70,6 +71,8 @@ instance encodeJsonAuthTokenInitIn :: EncodeJson AuthTokenInitIn where
 
 newtype PreliminaryAuthToken = PreliminaryAuthToken
   (Maybe (Either AuthTokenFailure AuthToken))
+
+derive instance genericPreliminaryAuthToken :: Generic PreliminaryAuthToken
 
 instance decodeJsonPreliminaryAuthToken :: DecodeJson PreliminaryAuthToken where
   decodeJson json = do
