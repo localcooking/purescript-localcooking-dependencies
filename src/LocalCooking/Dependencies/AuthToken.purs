@@ -69,20 +69,16 @@ instance encodeJsonAuthTokenInitIn :: EncodeJson AuthTokenInitIn where
     AuthTokenInitInExists y -> "exists" := y ~> jsonEmptyObject
 
 
-newtype PreliminaryAuthToken = PreliminaryAuthToken
-  (Maybe (Either AuthTokenFailure AuthToken))
+newtype PreliminaryAuthToken = PreliminaryAuthToken (Either AuthTokenFailure AuthToken)
 
 derive instance genericPreliminaryAuthToken :: Generic PreliminaryAuthToken
 
 instance decodeJsonPreliminaryAuthToken :: DecodeJson PreliminaryAuthToken where
   decodeJson json = do
-    mO <- decodeJson json
-    case mO of
-      Nothing -> pure (PreliminaryAuthToken Nothing)
-      Just o -> do
-        let err = PreliminaryAuthToken <<< Just <<< Left <$> o .? "err"
-            token = PreliminaryAuthToken <<< Just <<< Right <$> o .? "token"
-        err <|> token
+    o <- decodeJson json
+    let err = PreliminaryAuthToken <<< Left <$> o .? "err"
+        token = PreliminaryAuthToken <<< Right <$> o .? "token"
+    err <|> token
         
 
 
