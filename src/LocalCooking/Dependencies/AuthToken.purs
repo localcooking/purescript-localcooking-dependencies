@@ -24,6 +24,7 @@ import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Alternative ((<|>))
+import Test.QuickCheck (class Arbitrary)
 
 
 type Effects eff =
@@ -72,6 +73,14 @@ instance encodeJsonAuthTokenInitIn :: EncodeJson AuthTokenInitIn where
 newtype PreliminaryAuthToken = PreliminaryAuthToken (Either AuthTokenFailure AuthToken)
 
 derive instance genericPreliminaryAuthToken :: Generic PreliminaryAuthToken
+derive newtype instance eqPreliminaryAuthToken :: Eq PreliminaryAuthToken
+derive newtype instance showPreliminaryAuthToken :: Show PreliminaryAuthToken
+derive newtype instance arbitraryPreliminaryAuthToken :: Arbitrary PreliminaryAuthToken
+
+instance encodeJsonPreliminaryAuthToken :: EncodeJson PreliminaryAuthToken where
+  encodeJson (PreliminaryAuthToken eTkn) = case eTkn of
+    Left e -> "err" := e ~> jsonEmptyObject
+    Right x -> "token" := x ~> jsonEmptyObject
 
 instance decodeJsonPreliminaryAuthToken :: DecodeJson PreliminaryAuthToken where
   decodeJson json = do
