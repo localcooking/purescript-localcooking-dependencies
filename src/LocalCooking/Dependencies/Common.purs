@@ -105,7 +105,7 @@ instance decodeJsonUserDeltaIn :: DecodeJson UserDeltaIn where
 
 data UserDeltaOut
   = UserDeltaOutUser User
-  | UserDeltaOutSetUserFailed
+  | UserDeltaOutSetUserFailure
   | UserDeltaOutSetUserSuccess
 
 derive instance genericUserDeltaOut :: Generic UserDeltaOut
@@ -117,13 +117,13 @@ instance showUserDeltaOut :: Show UserDeltaOut where
 instance arbitraryUserDeltaOut :: Arbitrary UserDeltaOut where
   arbitrary = QC.oneOf $ NonEmpty
     (UserDeltaOutUser <$> arbitrary)
-    [ pure UserDeltaOutSetUserFailed
+    [ pure UserDeltaOutSetUserFailure
     , pure UserDeltaOutSetUserSuccess
     ]
 instance encodeJsonUserDeltaOut :: EncodeJson UserDeltaOut where
   encodeJson x = case x of
     UserDeltaOutUser y -> "user" := y ~> jsonEmptyObject
-    UserDeltaOutSetUserFailed -> encodeJson "setUserFailed"
+    UserDeltaOutSetUserFailure -> encodeJson "setUserFailure"
     UserDeltaOutSetUserSuccess -> encodeJson "setUserSuccess"
 instance decodeJsonUserDeltaOut :: DecodeJson UserDeltaOut where
   decodeJson json = do
@@ -134,7 +134,7 @@ instance decodeJsonUserDeltaOut :: DecodeJson UserDeltaOut where
         str = do
           s <- decodeJson json
           case unit of
-            _ | s == "setUserFailed" -> pure UserDeltaOutSetUserFailed
+            _ | s == "setUserFailure" -> pure UserDeltaOutSetUserFailure
               | s == "setUserSuccess" -> pure UserDeltaOutSetUserSuccess
               | otherwise -> fail "Not a UserDeltaOut"
     obj <|> str
