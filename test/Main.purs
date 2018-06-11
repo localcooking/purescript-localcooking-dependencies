@@ -2,6 +2,7 @@ module Test.Main where
 
 import LocalCooking.Dependencies.AuthToken (PreliminaryAuthToken)
 import LocalCooking.Dependencies.Common as Common
+import LocalCooking.Dependencies.AccessToken.Generic as Access
 
 import Prelude
 import Data.Either (Either (..))
@@ -17,6 +18,9 @@ main :: Eff _ Unit
 main = do
   log "JSON Iso:"
   jsonIsoAssert "LocalCooking.Dependencies.AuthToken.PreliminaryAuthToken" (Proxy :: Proxy PreliminaryAuthToken)
+  log "-------"
+  jsonIsoAssert "LocalCooking.Dependencies.AccessToken.Generic.AccessInitIn" (Proxy :: Proxy (Access.AccessInitIn Unit Unit))
+  jsonIsoAssert "LocalCooking.Dependencies.AccessToken.Generic.AccessInitOut" (Proxy :: Proxy (Access.AccessInitOut Unit))
   log "-------"
   jsonIsoAssert "LocalCooking.Dependencies.Common.UserInitIn" (Proxy :: Proxy Common.UserInitIn)
   jsonIsoAssert "LocalCooking.Dependencies.Common.UserInitOut" (Proxy :: Proxy Common.UserInitOut)
