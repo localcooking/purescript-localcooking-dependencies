@@ -12,9 +12,10 @@ import Sparrow.Types (Topic (..))
 import Prelude
 import Data.NonEmpty (NonEmpty (..))
 import Data.Generic (class Generic, gEq, gShow)
-import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, (:=), (~>), jsonEmptyObject, (.?))
+import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, (:=), (~>), jsonEmptyObject, (.?), fail)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Functor.Singleton (class SingletonFunctor)
+import Control.Alternative ((<|>))
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
@@ -104,6 +105,8 @@ instance decodeJsonUserDeltaIn :: DecodeJson UserDeltaIn where
 
 data UserDeltaOut
   = UserDeltaOutUser User
+  | UserDeltaOutSetUserFailed
+  | UserDeltaOutSetUserSuccess
 
 derive instance genericUserDeltaOut :: Generic UserDeltaOut
 
@@ -114,15 +117,27 @@ instance showUserDeltaOut :: Show UserDeltaOut where
 instance arbitraryUserDeltaOut :: Arbitrary UserDeltaOut where
   arbitrary = QC.oneOf $ NonEmpty
     (UserDeltaOutUser <$> arbitrary)
-    []
+    [ pure UserDeltaOutSetUserFailed
+    , pure UserDeltaOutSetUserSuccess
+    ]
 instance encodeJsonUserDeltaOut :: EncodeJson UserDeltaOut where
   encodeJson x = case x of
     UserDeltaOutUser y -> "user" := y ~> jsonEmptyObject
+    UserDeltaOutSetUserFailed -> encodeJson "setUserFailed"
+    UserDeltaOutSetUserSuccess -> encodeJson "setUserSuccess"
 instance decodeJsonUserDeltaOut :: DecodeJson UserDeltaOut where
   decodeJson json = do
-    o <- decodeJson json
-    let user = UserDeltaOutUser <$> o .? "user"
-    user
+    let obj = do
+          o <- decodeJson json
+          let user = UserDeltaOutUser <$> o .? "user"
+          user
+        str = do
+          s <- decodeJson json
+          case unit of
+            _ | s == "setUserFailed" -> pure UserDeltaOutSetUserFailed
+              | s == "setUserSuccess" -> pure UserDeltaOutSetUserSuccess
+              | otherwise -> fail "Not a UserDeltaOut"
+    obj <|> str
 
 
 
