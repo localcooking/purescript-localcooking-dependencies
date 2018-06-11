@@ -6,7 +6,7 @@ import LocalCooking.Common.AccessToken.Auth (AuthToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
+import Sparrow.Client.Queue (SparrowClientQueues, SparrowStaticClientQueues, sparrowStaticClientQueues, sparrowClientQueues, newSparrowStaticClientQueues, newSparrowClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -33,20 +33,17 @@ type Effects eff =
 
 type CommonQueues eff =
   { registerQueues :: RegisterSparrowClientQueues eff
-  , getUserQueues :: GetUserSparrowClientQueues eff
-  , setUserQueues :: SetUserSparrowClientQueues eff
+  , userQueues :: UserSparrowClientQueues eff
   }
 
 
 newCommonQueues :: forall eff. Eff (Effects eff) (CommonQueues (Effects eff))
 newCommonQueues = do
   registerQueues <- newSparrowStaticClientQueues
-  getUserQueues <- newSparrowStaticClientQueues
-  setUserQueues <- newSparrowStaticClientQueues
+  userQueues <- newSparrowClientQueues
   pure
     { registerQueues
-    , getUserQueues
-    , setUserQueues
+    , userQueues
     }
 
 
@@ -58,12 +55,10 @@ commonDependencies :: forall eff stM m
                      -> SparrowClientT (Effects eff) m Unit
 commonDependencies
   { registerQueues
-  , getUserQueues
-  , setUserQueues
+  , userQueues
   } = do
   unpackClient (Topic ["common","register"]) (sparrowStaticClientQueues registerQueues)
-  unpackClient (Topic ["common","getUser"]) (sparrowStaticClientQueues getUserQueues)
-  unpackClient (Topic ["common","setUser"]) (sparrowStaticClientQueues setUserQueues)
+  unpackClient (Topic ["common","user"]) (sparrowClientQueues userQueues)
 
 
 
@@ -131,12 +126,8 @@ instance decodeJsonUserDeltaOut :: DecodeJson UserDeltaOut where
 
 
 
-
 type RegisterSparrowClientQueues eff =
   SparrowStaticClientQueues eff Register RegisterError
 
-type GetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) User
-
-type SetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetUser) JSONUnit
+type UserSparrowClientQueues eff =
+  SparrowClientQueues eff UserInitIn UserInitOut UserDeltaIn UserDeltaOut
