@@ -30,13 +30,12 @@ type DependenciesQueues siteQueues eff =
 
 
 newQueues :: forall eff siteQueues
-           . Eff (Effects eff) siteQueues
+           . siteQueues
           -> Eff (Effects eff) (DependenciesQueues siteQueues (Effects eff))
-newQueues newSiteQueues = do
+newQueues siteQueues = do
   authTokenQueues <- newAuthTokenQueues
   validateQueues <- newValidateQueues
   commonQueues <- newCommonQueues
-  siteQueues <- newSiteQueues
   pure {authTokenQueues,validateQueues,commonQueues,siteQueues}
 
 
