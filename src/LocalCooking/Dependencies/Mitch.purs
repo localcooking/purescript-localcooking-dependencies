@@ -4,6 +4,8 @@ module LocalCooking.Dependencies.Mitch where
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.Rating (Rating)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
+import LocalCooking.Common.Tag.Meal (MealTag)
+import LocalCooking.Common.Tag.Chef (ChefTag)
 import LocalCooking.Semantics.Mitch
   ( Customer, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
   , Review, CartEntry, Order)
@@ -12,10 +14,14 @@ import LocalCooking.Database.Schema
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
+import Sparrow.Client.Queue
+  ( SparrowStaticClientQueues, SparrowClientQueues
+  , sparrowStaticClientQueues, newSparrowStaticClientQueues
+  , sparrowClientQueues, newSparrowClientQueues)
 import Sparrow.Types (Topic (..))
 
 import Prelude
+import Data.Maybe (Maybe)
 import Data.Image.Source (ImageSource)
 import Data.Date (Date)
 import Data.Date.JSON (JSONDate (..))
@@ -54,6 +60,8 @@ type MitchQueues eff =
   , getCartQueues :: SetCustomerSparrowClientQueues eff
   , addToCartQueues :: SetCustomerSparrowClientQueues eff
   , getOrdersQueues :: SetCustomerSparrowClientQueues eff
+  , searchMealTagsQueues :: SearchMealTagsSparrowClientQueues eff
+  , searchChefTagsQueues :: SearchChefTagsSparrowClientQueues eff
   }
 
 
@@ -73,6 +81,8 @@ newMitchQueues = do
   getCartQueues <- newSparrowStaticClientQueues
   addToCartQueues <- newSparrowStaticClientQueues
   getOrdersQueues <- newSparrowStaticClientQueues
+  searchMealTagsQueues <- newSparrowClientQueues
+  searchChefTagsQueues <- newSparrowClientQueues
   pure
     { setCustomerQueues
     , getCustomerQueues
@@ -88,6 +98,8 @@ newMitchQueues = do
     , getCartQueues
     , addToCartQueues
     , getOrdersQueues
+    , searchMealTagsQueues
+    , searchChefTagsQueues
     }
 
 
@@ -112,6 +124,8 @@ mitchDependencies
   , getCartQueues
   , addToCartQueues
   , getOrdersQueues
+  , searchMealTagsQueues
+  , searchChefTagsQueues
   } = do
   unpackClient (Topic ["mitch","setCustomer"]) (sparrowStaticClientQueues setCustomerQueues)
   unpackClient (Topic ["mitch","getCustomer"]) (sparrowStaticClientQueues getCustomerQueues)
@@ -127,6 +141,8 @@ mitchDependencies
   unpackClient (Topic ["mitch","getCart"]) (sparrowStaticClientQueues getCartQueues)
   unpackClient (Topic ["mitch","addToCart"]) (sparrowStaticClientQueues addToCartQueues)
   unpackClient (Topic ["mitch","getOrders"]) (sparrowStaticClientQueues getOrdersQueues)
+  unpackClient (Topic ["mitch","searchMealTags"]) (sparrowClientQueues searchMealTagsQueues)
+  unpackClient (Topic ["mitch","searchChefTags"]) (sparrowClientQueues searchChefTagsQueues)
 
 
 type SetCustomerSparrowClientQueues eff =
@@ -249,3 +265,11 @@ type AddToCartSparrowClientQueues eff =
 
 type GetOrdersSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken AddToCart) (Array Order)
+
+
+type SearchMealTagsSparrowClientQueues eff =
+  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array MealTag))
+
+
+type SearchChefTagsSparrowClientQueues eff =
+  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array ChefTag))
