@@ -2,7 +2,8 @@ module LocalCooking.Dependencies.Admin where
 
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Semantics.Common (User, Register)
+import LocalCooking.Semantics.Common (User)
+import LocalCooking.Semantics.Admin (SetUser, NewUser)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -61,8 +62,8 @@ type GetUsersSparrowClientQueues eff =
 
 
 type SetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken User) JSONUnit
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetUser) JSONUnit
 
 
 type NewUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken Register) JSONUnit
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken NewUser) JSONUnit
