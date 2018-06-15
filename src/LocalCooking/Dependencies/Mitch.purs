@@ -28,14 +28,15 @@ import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.String.Markdown (MarkdownText)
 import Data.Argonaut.JSONUnit (JSONUnit)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson, fail)
-import Data.Generic (class Generic)
+import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
+import Data.Generic (class Generic, gEq, gShow)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
+import Test.QuickCheck (class Arbitrary, arbitrary)
 
 
 
@@ -162,6 +163,21 @@ newtype SubmitReview = SubmitReview
 
 derive instance genericSubmitReview :: Generic SubmitReview
 
+instance eqSubmitReview :: Eq SubmitReview where
+  eq = gEq
+
+instance showSubmitReview :: Show SubmitReview where
+  show = gShow
+
+instance arbitrarySubmitReview :: Arbitrary SubmitReview where
+  arbitrary = do
+    order <- arbitrary
+    rating <- arbitrary
+    heading <- arbitrary
+    body <- arbitrary
+    images <- arbitrary
+    pure (SubmitReview {order,rating,heading,body,images})
+
 instance encodeJsonSubmitReview :: EncodeJson SubmitReview where
   encodeJson (SubmitReview {order,rating,heading,body,images})
     =  "order" := order
@@ -170,6 +186,16 @@ instance encodeJsonSubmitReview :: EncodeJson SubmitReview where
     ~> "body" := body
     ~> "images" := images
     ~> jsonEmptyObject
+
+instance decodeJsonSubmitReview :: DecodeJson SubmitReview where
+  decodeJson json = do
+    o <- decodeJson json
+    order <- o .? "order"
+    rating <- o .? "rating"
+    heading <- o .? "heading"
+    body <- o .? "body"
+    images <- o .? "images"
+    pure (SubmitReview {order,rating,heading,body,images})
 
 type SubmitReviewSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken SubmitReview) StoredReviewId
@@ -206,11 +232,32 @@ newtype BrowseMenu = BrowseMenu
 
 derive instance genericBrowseMenu :: Generic BrowseMenu
 
+instance eqBrowseMenu :: Eq BrowseMenu where
+  eq = gEq
+
+instance showBrowseMenu :: Show BrowseMenu where
+  show = gShow
+
+
+instance arbitraryBrowseMenu :: Arbitrary BrowseMenu where
+  arbitrary = do
+    chef <- arbitrary
+    JSONDate deadline <- arbitrary
+    pure (BrowseMenu {chef,deadline})
+
+
 instance encodeJsonBrowseMenu :: EncodeJson BrowseMenu where
   encodeJson (BrowseMenu {chef,deadline})
     =  "chef" := chef
     ~> "deadline" := JSONDate deadline
     ~> jsonEmptyObject
+
+instance decodeJsonBrowseMenu :: DecodeJson BrowseMenu where
+  decodeJson json = do
+    o <- decodeJson json
+    chef <- o .? "chef"
+    JSONDate deadline <- o .? "deadline"
+    pure (BrowseMenu {chef,deadline})
 
 
 type BrowseMenuSparrowClientQueues eff =
@@ -225,12 +272,34 @@ newtype BrowseMeal = BrowseMeal
 
 derive instance genericBrowseMeal :: Generic BrowseMeal
 
+instance eqBrowseMeal :: Eq BrowseMeal where
+  eq = gEq
+
+instance showBrowseMeal :: Show BrowseMeal where
+  show = gShow
+
+
+instance arbitraryBrowseMeal :: Arbitrary BrowseMeal where
+  arbitrary = do
+    chef <- arbitrary
+    JSONDate deadline <- arbitrary
+    meal <- arbitrary
+    pure (BrowseMeal {chef,deadline,meal})
+
 instance encodeJsonBrowseMeal :: EncodeJson BrowseMeal where
   encodeJson (BrowseMeal {chef,deadline,meal})
     =  "chef" := chef
     ~> "deadline" := JSONDate deadline
     ~> "meal" := meal
     ~> jsonEmptyObject
+
+instance decodeJsonBrowseMeal :: DecodeJson BrowseMeal where
+  decodeJson json = do
+    o <- decodeJson json
+    chef <- o .? "chef"
+    JSONDate deadline <- o .? "deadline"
+    meal <- o .? "meal"
+    pure (BrowseMeal {chef,deadline,meal})
 
 
 type BrowseMealSparrowClientQueues eff =
@@ -250,6 +319,20 @@ newtype AddToCart = AddToCart
 
 derive instance genericAddToCart :: Generic AddToCart
 
+instance eqAddToCart :: Eq AddToCart where
+  eq = gEq
+
+instance showAddToCart :: Show AddToCart where
+  show = gShow
+
+instance arbitraryAddToCart :: Arbitrary AddToCart where
+  arbitrary = do
+    chef <- arbitrary
+    JSONDate deadline <- arbitrary
+    meal <- arbitrary
+    volume <- arbitrary
+    pure (AddToCart {chef,deadline,meal,volume})
+
 instance encodeJsonAddToCart :: EncodeJson AddToCart where
   encodeJson (AddToCart {chef,deadline,meal,volume})
     =  "chef" := chef
@@ -257,6 +340,15 @@ instance encodeJsonAddToCart :: EncodeJson AddToCart where
     ~> "meal" := meal
     ~> "volume" := volume
     ~> jsonEmptyObject
+
+instance decodeJsonAddToCart :: DecodeJson AddToCart where
+  decodeJson json = do
+    o <- decodeJson json
+    chef <- o .? "chef"
+    JSONDate deadline <- o .? "deadline"
+    meal <- o .? "meal"
+    volume <- o .? "volume"
+    pure (AddToCart {chef,deadline,meal,volume})
 
 
 type AddToCartSparrowClientQueues eff =

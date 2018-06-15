@@ -2,6 +2,8 @@ module Test.Main where
 
 import LocalCooking.Dependencies.AuthToken (PreliminaryAuthToken)
 import LocalCooking.Dependencies.Common as Common
+import LocalCooking.Dependencies.Mitch as Mitch
+import LocalCooking.Dependencies.Validate as Validate
 import LocalCooking.Dependencies.AccessToken.Generic as Access
 
 import Prelude
@@ -26,6 +28,15 @@ main = do
   jsonIsoAssert "LocalCooking.Dependencies.Common.UserInitOut" (Proxy :: Proxy Common.UserInitOut)
   jsonIsoAssert "LocalCooking.Dependencies.Common.UserDeltaIn" (Proxy :: Proxy Common.UserDeltaIn)
   jsonIsoAssert "LocalCooking.Dependencies.Common.UserDeltaOut" (Proxy :: Proxy Common.UserDeltaOut)
+  log "-------"
+  jsonIsoAssert "LocalCooking.Dependencies.Mitch.SubmitReview" (Proxy :: Proxy Mitch.SubmitReview)
+  jsonIsoAssert "LocalCooking.Dependencies.Mitch.BrowseMenu" (Proxy :: Proxy Mitch.BrowseMenu)
+  jsonIsoAssert "LocalCooking.Dependencies.Mitch.BrowseMeal" (Proxy :: Proxy Mitch.BrowseMeal)
+  jsonIsoAssert "LocalCooking.Dependencies.Mitch.AddToCart" (Proxy :: Proxy Mitch.AddToCart)
+  log "-------"
+  jsonIsoAssert "LocalCooking.Dependencies.Validate.IsUniqueMenuDeadline" (Proxy :: Proxy Validate.IsUniqueMenuDeadline)
+  jsonIsoAssert "LocalCooking.Dependencies.Validate.IsUniqueMealPermalink" (Proxy :: Proxy Validate.IsUniqueMealPermalink)
+  jsonIsoAssert "LocalCooking.Dependencies.Validate.PasswordVerifyUnauth" (Proxy :: Proxy Validate.PasswordVerifyUnauth)
 
 
 jsonIsoAssert :: forall a
