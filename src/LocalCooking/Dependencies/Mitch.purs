@@ -7,7 +7,7 @@ import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Meal (MealTag)
 import LocalCooking.Common.Tag.Chef (ChefTag)
 import LocalCooking.Semantics.Mitch
-  ( Customer, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
+  ( Customer, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
   , Review, CartEntry, Order)
 import LocalCooking.Database.Schema
   ( StoredOrderId, StoredReviewId, StoredMealId, StoredMenuId, StoredChefId)
@@ -49,6 +49,10 @@ type Effects eff =
 type MitchQueues eff =
   { setCustomerQueues :: SetCustomerSparrowClientQueues eff
   , getCustomerQueues :: SetCustomerSparrowClientQueues eff
+  , setDietsQueues :: SetDietsSparrowClientQueues eff
+  , getDietsQueues :: SetDietsSparrowClientQueues eff
+  , setAllergiesQueues :: SetAllergiesSparrowClientQueues eff
+  , getAllergiesQueues :: SetAllergiesSparrowClientQueues eff
   , submitReviewQueues :: SetCustomerSparrowClientQueues eff
   , getReviewQueues :: SetCustomerSparrowClientQueues eff
   , getMealSynopsisQueues :: SetCustomerSparrowClientQueues eff
@@ -70,6 +74,10 @@ newMitchQueues :: forall eff. Eff (Effects eff) (MitchQueues (Effects eff))
 newMitchQueues = do
   setCustomerQueues <- newSparrowStaticClientQueues
   getCustomerQueues <- newSparrowStaticClientQueues
+  setDietsQueues <- newSparrowStaticClientQueues
+  getDietsQueues <- newSparrowStaticClientQueues
+  setAllergiesQueues <- newSparrowStaticClientQueues
+  getAllergiesQueues <- newSparrowStaticClientQueues
   submitReviewQueues <- newSparrowStaticClientQueues
   getReviewQueues <- newSparrowStaticClientQueues
   getMealSynopsisQueues <- newSparrowStaticClientQueues
@@ -87,6 +95,10 @@ newMitchQueues = do
   pure
     { setCustomerQueues
     , getCustomerQueues
+    , setDietsQueues
+    , getDietsQueues
+    , setAllergiesQueues
+    , getAllergiesQueues
     , submitReviewQueues
     , getReviewQueues
     , getMealSynopsisQueues
@@ -113,6 +125,10 @@ mitchDependencies :: forall eff stM m
 mitchDependencies
   { setCustomerQueues
   , getCustomerQueues
+  , setDietsQueues
+  , getDietsQueues
+  , setAllergiesQueues
+  , getAllergiesQueues
   , submitReviewQueues
   , getReviewQueues
   , getMealSynopsisQueues
@@ -130,6 +146,10 @@ mitchDependencies
   } = do
   unpackClient (Topic ["mitch","setCustomer"]) (sparrowStaticClientQueues setCustomerQueues)
   unpackClient (Topic ["mitch","getCustomer"]) (sparrowStaticClientQueues getCustomerQueues)
+  unpackClient (Topic ["mitch","setDiets"]) (sparrowStaticClientQueues setDietsQueues)
+  unpackClient (Topic ["mitch","getDiets"]) (sparrowStaticClientQueues getDietsQueues)
+  unpackClient (Topic ["mitch","setAllergies"]) (sparrowStaticClientQueues setAllergiesQueues)
+  unpackClient (Topic ["mitch","getAllergies"]) (sparrowStaticClientQueues getAllergiesQueues)
   unpackClient (Topic ["mitch","submitReview"]) (sparrowStaticClientQueues submitReviewQueues)
   unpackClient (Topic ["mitch","getReview"]) (sparrowStaticClientQueues getReviewQueues)
   unpackClient (Topic ["mitch","getMealSynopsis"]) (sparrowStaticClientQueues getMealSynopsisQueues)
@@ -151,6 +171,20 @@ type SetCustomerSparrowClientQueues eff =
 
 type GetCustomerSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Customer
+
+
+type SetDietsSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken Diets) JSONUnit
+
+type GetDietsSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Diets
+
+
+type SetAllergiesSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken Allergies) JSONUnit
+
+type GetAllergiesSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Allergies
 
 
 newtype SubmitReview = SubmitReview
