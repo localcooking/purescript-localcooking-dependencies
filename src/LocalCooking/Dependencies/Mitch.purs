@@ -48,11 +48,11 @@ type Effects eff =
 
 type MitchQueues eff =
   { setCustomerQueues :: SetCustomerSparrowClientQueues eff
-  , getCustomerQueues :: SetCustomerSparrowClientQueues eff
+  , getCustomerQueues :: GetCustomerSparrowClientQueues eff
   , setDietsQueues :: SetDietsSparrowClientQueues eff
-  , getDietsQueues :: SetDietsSparrowClientQueues eff
+  , getDietsQueues :: GetDietsSparrowClientQueues eff
   , setAllergiesQueues :: SetAllergiesSparrowClientQueues eff
-  , getAllergiesQueues :: SetAllergiesSparrowClientQueues eff
+  , getAllergiesQueues :: GetAllergiesSparrowClientQueues eff
   , submitReviewQueues :: SetCustomerSparrowClientQueues eff
   , getReviewQueues :: SetCustomerSparrowClientQueues eff
   , getMealSynopsisQueues :: SetCustomerSparrowClientQueues eff
