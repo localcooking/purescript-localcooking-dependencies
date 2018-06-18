@@ -53,18 +53,18 @@ type MitchQueues eff =
   , getDietsQueues :: GetDietsSparrowClientQueues eff
   , setAllergiesQueues :: SetAllergiesSparrowClientQueues eff
   , getAllergiesQueues :: GetAllergiesSparrowClientQueues eff
-  , submitReviewQueues :: SetCustomerSparrowClientQueues eff
-  , getReviewQueues :: SetCustomerSparrowClientQueues eff
-  , getMealSynopsisQueues :: SetCustomerSparrowClientQueues eff
-  , getChefSynopsisQueues :: SetCustomerSparrowClientQueues eff
-  , getChefMenuSynopsesQueues :: SetCustomerSparrowClientQueues eff
-  , getMenuMealSynopsesQueues :: SetCustomerSparrowClientQueues eff
-  , browseChefQueues :: SetCustomerSparrowClientQueues eff
-  , browseMenuQueues :: SetCustomerSparrowClientQueues eff
-  , browseMealQueues :: SetCustomerSparrowClientQueues eff
-  , getCartQueues :: SetCustomerSparrowClientQueues eff
-  , addToCartQueues :: SetCustomerSparrowClientQueues eff
-  , getOrdersQueues :: SetCustomerSparrowClientQueues eff
+  , submitReviewQueues :: SubmitReviewSparrowClientQueues eff
+  , getReviewQueues :: GetReviewSparrowClientQueues eff
+  , getMealSynopsisQueues :: GetMealSynopsisSparrowClientQueues eff
+  , getChefSynopsisQueues :: GetChefSynopsisSparrowClientQueues eff
+  , getChefMenuSynopsesQueues :: GetChefMenuSynopsesSparrowClientQueues eff
+  , getMenuMealSynopsesQueues :: GetMenuMealSynopsesSparrowClientQueues eff
+  , browseChefQueues :: BrowseChefSparrowClientQueues eff
+  , browseMenuQueues :: BrowseMenuSparrowClientQueues eff
+  , browseMealQueues :: BrowseMealSparrowClientQueues eff
+  , getCartQueues :: GetCartSparrowClientQueues eff
+  , addToCartQueues :: AddToCartSparrowClientQueues eff
+  , getOrdersQueues :: GetOrdersSparrowClientQueues eff
   , searchMealTagsQueues :: SearchMealTagsSparrowClientQueues eff
   , searchChefTagsQueues :: SearchChefTagsSparrowClientQueues eff
   }
