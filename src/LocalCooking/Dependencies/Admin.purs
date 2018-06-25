@@ -2,8 +2,11 @@ module LocalCooking.Dependencies.Admin where
 
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Semantics.Common (User)
-import LocalCooking.Semantics.Admin (SetUser, NewUser)
+import LocalCooking.Database.Schema (StoredEditorId)
+import LocalCooking.Semantics.ContentRecord (ContentRecordVariant)
+import LocalCooking.Semantics.Common (User, WithId)
+import LocalCooking.Semantics.Admin
+  (SetUser, NewUser, GetSetSubmissionPolicy)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -30,6 +33,9 @@ type AdminQueues eff =
   { getUsersQueues :: GetUsersSparrowClientQueues eff
   , setUserQueues :: SetUserSparrowClientQueues eff
   , newUserQueues :: NewUserSparrowClientQueues eff
+  , getSubmissionPolicyQueues :: GetSubmissionPolicySparrowClientQueues eff
+  , setSubmissionPolicyQueues :: SetSubmissionPolicySparrowClientQueues eff
+  , assignSubmissionPolicyQueues :: AssignSubmissionPolicySparrowClientQueues eff
   }
 
 
@@ -38,10 +44,16 @@ newAdminQueues = do
   getUsersQueues <- newSparrowStaticClientQueues
   setUserQueues <- newSparrowStaticClientQueues
   newUserQueues <- newSparrowStaticClientQueues
+  getSubmissionPolicyQueues <- newSparrowStaticClientQueues
+  setSubmissionPolicyQueues <- newSparrowStaticClientQueues
+  assignSubmissionPolicyQueues <- newSparrowStaticClientQueues
   pure
     { getUsersQueues
     , setUserQueues
     , newUserQueues
+    , getSubmissionPolicyQueues
+    , setSubmissionPolicyQueues
+    , assignSubmissionPolicyQueues
     }
 
 
@@ -51,10 +63,20 @@ adminDependencies :: forall eff stM m
                   => SingletonFunctor stM
                   => AdminQueues (Effects eff)
                   -> SparrowClientT (Effects eff) m Unit
-adminDependencies {getUsersQueues,setUserQueues,newUserQueues} = do
+adminDependencies
+  { getUsersQueues
+  , setUserQueues
+  , newUserQueues
+  , getSubmissionPolicyQueues
+  , setSubmissionPolicyQueues
+  , assignSubmissionPolicyQueues
+  } = do
   unpackClient (Topic ["admin","getUsers"]) (sparrowStaticClientQueues getUsersQueues)
   unpackClient (Topic ["admin","setUser"]) (sparrowStaticClientQueues setUserQueues)
   unpackClient (Topic ["admin","newUser"]) (sparrowStaticClientQueues newUserQueues)
+  unpackClient (Topic ["admin","getSubmissionPolicy"]) (sparrowStaticClientQueues getSubmissionPolicyQueues)
+  unpackClient (Topic ["admin","setSubmissionPolicy"]) (sparrowStaticClientQueues setSubmissionPolicyQueues)
+  unpackClient (Topic ["admin","assignSubmissionPolicy"]) (sparrowStaticClientQueues assignSubmissionPolicyQueues)
 
 
 type GetUsersSparrowClientQueues eff =
@@ -67,3 +89,15 @@ type SetUserSparrowClientQueues eff =
 
 type NewUserSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken NewUser) JSONUnit
+
+
+type GetSubmissionPolicySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) GetSetSubmissionPolicy
+
+
+type SetSubmissionPolicySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken GetSetSubmissionPolicy) JSONUnit
+
+
+type AssignSubmissionPolicySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredEditorId ContentRecordVariant)) JSONUnit

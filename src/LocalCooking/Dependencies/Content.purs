@@ -3,7 +3,6 @@ module LocalCooking.Dependencies.Content where
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Meal (MealTag)
--- import LocalCooking.Common.Tag.Content (ContentTag)
 import LocalCooking.Semantics.Content ()
 import LocalCooking.Database.Schema (StoredMealId, StoredMenuId)
 
