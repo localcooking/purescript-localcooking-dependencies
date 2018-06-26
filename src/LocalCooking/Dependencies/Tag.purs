@@ -7,7 +7,10 @@ import LocalCooking.Common.Tag.Meal (MealTag)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
-import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues)
+import Sparrow.Client.Queue
+   ( SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues
+   , SparrowClientQueues, sparrowClientQueues, newSparrowClientQueues
+   )
 import Sparrow.Types (Topic (..))
 
 import Prelude
@@ -37,8 +40,8 @@ type TagQueues eff =
 
 newTagQueues :: forall eff. Eff (Effects eff) (TagQueues (Effects eff))
 newTagQueues = do
-  searchChefTagsQueues <- newSparrowStaticClientQueues
-  searchMealTagsQueues <- newSparrowStaticClientQueues
+  searchChefTagsQueues <- newSparrowClientQueues
+  searchMealTagsQueues <- newSparrowClientQueues
   submitChefTagQueues <- newSparrowStaticClientQueues
   submitMealTagQueues <- newSparrowStaticClientQueues
   pure
@@ -60,18 +63,18 @@ tagDependencies
   , submitChefTagQueues
   , submitMealTagQueues
   } = do
-  unpackClient (Topic ["tag","search","chef"]) (sparrowStaticClientQueues searchChefTagsQueues)
-  unpackClient (Topic ["tag","search","meal"]) (sparrowStaticClientQueues searchMealTagsQueues)
+  unpackClient (Topic ["tag","search","chef"]) (sparrowClientQueues searchChefTagsQueues)
+  unpackClient (Topic ["tag","search","meal"]) (sparrowClientQueues searchMealTagsQueues)
   unpackClient (Topic ["tag","submit","chef"]) (sparrowStaticClientQueues submitChefTagQueues)
   unpackClient (Topic ["tag","submit","meal"]) (sparrowStaticClientQueues submitMealTagQueues)
 
 
 
 type SearchChefTagsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff String (Array ChefTag)
+  SparrowClientQueues eff JSONUnit JSONUnit String (Array ChefTag)
 
 type SearchMealTagsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff String (Array MealTag)
+  SparrowClientQueues eff JSONUnit JSONUnit String (Array MealTag)
 
 type SubmitChefTagSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken ChefTag) JSONUnit
