@@ -2,9 +2,10 @@ module LocalCooking.Dependencies.Content where
 
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Common.Tag.Meal (MealTag)
-import LocalCooking.Semantics.Content ()
-import LocalCooking.Database.Schema (StoredMealId, StoredMenuId)
+import LocalCooking.Semantics.Common (WithId)
+import LocalCooking.Semantics.Content (GetEditor, SetEditor, GetRecordSubmissionPolicy, GetRecordSubmission)
+import LocalCooking.Semantics.ContentRecord (ContentRecordVariant)
+import LocalCooking.Database.Schema (StoredRecordSubmissionId)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -13,8 +14,6 @@ import Sparrow.Types (Topic (..))
 
 import Prelude
 import Data.Argonaut.JSONUnit (JSONUnit)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
-import Data.Generic (class Generic)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff, kind Effect)
@@ -30,34 +29,29 @@ type Effects eff =
   | eff)
 
 
-type ContentQueues (eff :: # Effect) =
-  {}
+type ContentQueues eff =
+  { getEditorQueues :: GetEditorSparrowClientQueues eff
+  , setEditorQueues :: SetEditorSparrowClientQueues eff
+  , getSubmissionPolicyQueues :: GetSubmissionPolicySparrowClientQueues eff
+  , approveSubmissionQueues :: ApproveSubmissionSparrowClientQueues eff
+  , getSubmissionsQueues :: GetSubmissionsSparrowClientQueues eff
+  }
 
 
 newContentQueues :: forall eff. Eff (Effects eff) (ContentQueues (Effects eff))
 newContentQueues = do
-  -- addMealTagQueues <- newSparrowStaticClientQueues
-  -- addContentTagQueues <- newSparrowStaticClientQueues
-  -- getContentQueues <- newSparrowStaticClientQueues
-  -- setContentQueues <- newSparrowStaticClientQueues
-  -- getMenusQueues <- newSparrowStaticClientQueues
-  -- setMenuQueues <- newSparrowStaticClientQueues
-  -- newMenuQueues <- newSparrowStaticClientQueues
-  -- getMealsQueues <- newSparrowStaticClientQueues
-  -- setMealQueues <- newSparrowStaticClientQueues
-  -- newMealQueues <- newSparrowStaticClientQueues
-  pure {}
-    -- { addMealTagQueues
-    -- , addContentTagQueues
-    -- , getContentQueues
-    -- , setContentQueues
-    -- , getMenusQueues
-    -- , setMenuQueues
-    -- , newMenuQueues
-    -- , getMealsQueues
-    -- , setMealQueues
-    -- , newMealQueues
-    -- }
+  getEditorQueues <- newSparrowStaticClientQueues
+  setEditorQueues <- newSparrowStaticClientQueues
+  getSubmissionPolicyQueues <- newSparrowStaticClientQueues
+  approveSubmissionQueues <- newSparrowStaticClientQueues
+  getSubmissionsQueues <- newSparrowStaticClientQueues
+  pure
+    { getEditorQueues
+    , setEditorQueues
+    , getSubmissionPolicyQueues
+    , approveSubmissionQueues
+    , getSubmissionsQueues
+    }
 
 
 contentDependencies :: forall eff stM m
@@ -67,15 +61,31 @@ contentDependencies :: forall eff stM m
                      => ContentQueues (Effects eff)
                      -> SparrowClientT (Effects eff) m Unit
 contentDependencies
-  {} = do
-  pure unit
-  -- unpackClient (Topic ["content","addMealTag"]) (sparrowStaticClientQueues addMealTagQueues)
-  -- unpackClient (Topic ["content","addContentTag"]) (sparrowStaticClientQueues addContentTagQueues)
-  -- unpackClient (Topic ["content","getContent"]) (sparrowStaticClientQueues getContentQueues)
-  -- unpackClient (Topic ["content","setContent"]) (sparrowStaticClientQueues setContentQueues)
-  -- unpackClient (Topic ["content","getMenus"]) (sparrowStaticClientQueues getMenusQueues)
-  -- unpackClient (Topic ["content","setMenu"]) (sparrowStaticClientQueues setMenuQueues)
-  -- unpackClient (Topic ["content","newMenu"]) (sparrowStaticClientQueues newMenuQueues)
-  -- unpackClient (Topic ["content","getMeals"]) (sparrowStaticClientQueues getMealsQueues)
-  -- unpackClient (Topic ["content","setMeal"]) (sparrowStaticClientQueues setMealQueues)
-  -- unpackClient (Topic ["content","newMeal"]) (sparrowStaticClientQueues newMealQueues)
+  { getEditorQueues
+  , setEditorQueues
+  , getSubmissionPolicyQueues
+  , approveSubmissionQueues
+  , getSubmissionsQueues
+  } = do
+  unpackClient (Topic ["content","getEditor"]) (sparrowStaticClientQueues getEditorQueues)
+  unpackClient (Topic ["content","setEditor"]) (sparrowStaticClientQueues setEditorQueues)
+  unpackClient (Topic ["content","getSubmissionPolicy"]) (sparrowStaticClientQueues getSubmissionPolicyQueues)
+  unpackClient (Topic ["content","approveSubmission"]) (sparrowStaticClientQueues approveSubmissionQueues)
+  unpackClient (Topic ["content","getSubmissions"]) (sparrowStaticClientQueues getSubmissionsQueues)
+
+
+
+type GetEditorSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) GetEditor
+
+type SetEditorSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetEditor) JSONUnit
+
+type GetSubmissionPolicySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) GetRecordSubmissionPolicy
+
+type ApproveSubmissionSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken StoredRecordSubmissionId) JSONUnit
+
+type GetSubmissionsSparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) (Array (WithId StoredRecordSubmissionId GetRecordSubmission))
