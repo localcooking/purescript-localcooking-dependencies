@@ -14,6 +14,7 @@ import Sparrow.Client.Queue
 import Sparrow.Types (Topic (..))
 
 import Prelude
+import Data.Maybe (Maybe)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
@@ -71,10 +72,10 @@ tagDependencies
 
 
 type SearchChefTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Array ChefTag)
+  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array ChefTag))
 
 type SearchMealTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Array MealTag)
+  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array MealTag))
 
 type SubmitChefTagSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken ChefTag) JSONUnit
