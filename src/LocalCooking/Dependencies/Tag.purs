@@ -14,18 +14,20 @@ import Sparrow.Client.Types (SparrowClientT)
 import Sparrow.Client.Queue
    ( SparrowStaticClientQueues, sparrowStaticClientQueues, newSparrowStaticClientQueues
    , SparrowClientQueues, sparrowClientQueues, newSparrowClientQueues
-   )
+   , mountSparrowClientQueuesSingleton)
 import Sparrow.Types (Topic (..))
 
 import Prelude
-import Data.Maybe (Maybe)
-import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Maybe (Maybe (..))
+import Data.Argonaut.JSONUnit (JSONUnit (..))
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff, kind Effect)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
+import Queue.Types (writeOnly)
+import Queue.One as One
 
 
 
@@ -112,6 +114,75 @@ tagDependencies
   unpackClient (Topic ["tag","submit","farm"]) (sparrowStaticClientQueues submitFarmTagQueues)
   unpackClient (Topic ["tag","submit","ingredient"]) (sparrowStaticClientQueues submitIngredientTagQueues)
   unpackClient (Topic ["tag","submit","meal"]) (sparrowStaticClientQueues submitMealTagQueues)
+
+
+
+mountTagSearchQueues :: forall eff
+                      . TagQueues (Effects eff)
+                     -> { onChefTagSearchResult       :: Array ChefTag       -> Eff (Effects eff) Unit
+                        , onCultureTagSearchResult    :: Array CultureTag    -> Eff (Effects eff) Unit
+                        , onDietTagSearchResult       :: Array DietTag       -> Eff (Effects eff) Unit
+                        , onFarmTagSearchResult       :: Array FarmTag       -> Eff (Effects eff) Unit
+                        , onIngredientTagSearchResult :: Array IngredientTag -> Eff (Effects eff) Unit
+                        , onMealTagSearchResult       :: Array MealTag       -> Eff (Effects eff) Unit
+                        }
+                     -> Eff (Effects eff)
+                          { searchChefTags       :: String -> Eff (Effects eff) Unit
+                          , searchCultureTags    :: String -> Eff (Effects eff) Unit
+                          , searchDietTags       :: String -> Eff (Effects eff) Unit
+                          , searchFarmTags       :: String -> Eff (Effects eff) Unit
+                          , searchIngredientTags :: String -> Eff (Effects eff) Unit
+                          , searchMealTags       :: String -> Eff (Effects eff) Unit
+                          }
+mountTagSearchQueues
+  tagQueues
+  { onChefTagSearchResult
+  , onCultureTagSearchResult
+  , onDietTagSearchResult
+  , onFarmTagSearchResult
+  , onIngredientTagSearchResult
+  , onMealTagSearchResult
+  } = do
+
+  searchChefTags       <- mountOne onChefTagSearchResult       tagQueues.searchChefTagsQueues
+  searchCultureTags    <- mountOne onCultureTagSearchResult    tagQueues.searchCultureTagsQueues
+  searchDietTags       <- mountOne onDietTagSearchResult       tagQueues.searchDietTagsQueues
+  searchFarmTags       <- mountOne onFarmTagSearchResult       tagQueues.searchFarmTagsQueues
+  searchIngredientTags <- mountOne onIngredientTagSearchResult tagQueues.searchIngredientTagsQueues
+  searchMealTags       <- mountOne onMealTagSearchResult       tagQueues.searchMealTagsQueues
+
+
+  pure
+    { searchChefTags
+    , searchCultureTags
+    , searchDietTags
+    , searchFarmTags
+    , searchIngredientTags
+    , searchMealTags
+    }
+  where
+    mountOne :: forall tag
+              . (Array tag -> Eff (Effects eff) Unit)
+             -> SparrowClientQueues (Effects eff) JSONUnit JSONUnit String (Maybe (Array tag))
+             -> Eff (Effects eff) (String -> Eff (Effects eff) Unit)
+    mountOne onResult queues = do
+      deltaInQueue <- writeOnly <$> One.newQueue
+      initInQueue <- writeOnly <$> One.newQueue
+
+      let onDeltaOut deltaOut = case deltaOut of
+            Nothing -> pure unit
+            Just chefTags -> onResult chefTags
+          onInitOut mInitOut = case mInitOut of
+              -- FIXME apply to error queue
+            Nothing -> pure unit
+            Just JSONUnit -> pure unit
+
+      _ <- mountSparrowClientQueuesSingleton queues
+        deltaInQueue initInQueue onDeltaOut onInitOut
+
+      One.putQueue initInQueue JSONUnit
+
+      pure (One.putQueue deltaInQueue)
 
 
 
