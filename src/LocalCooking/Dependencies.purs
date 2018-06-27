@@ -21,33 +21,31 @@ type Effects eff =
   , exception :: EXCEPTION
   | eff)
 
-type DependenciesQueues siteQueues eff =
+type DependenciesQueues eff =
   { authTokenQueues :: AuthTokenQueues eff
   , validateQueues :: ValidateQueues eff
   , commonQueues :: CommonQueues eff
-  , siteQueues :: siteQueues
   }
 
 
-newQueues :: forall eff siteQueues
-           . siteQueues
-          -> Eff (Effects eff) (DependenciesQueues siteQueues (Effects eff))
-newQueues siteQueues = do
+newQueues :: forall eff
+           . Eff (Effects eff) (DependenciesQueues (Effects eff))
+newQueues = do
   authTokenQueues <- newAuthTokenQueues
   validateQueues <- newValidateQueues
   commonQueues <- newCommonQueues
-  pure {authTokenQueues,validateQueues,commonQueues,siteQueues}
+  pure {authTokenQueues,validateQueues,commonQueues}
 
 
-dependencies :: forall eff m siteQueues stM
+dependencies :: forall eff m stM
               . MonadBaseControl (Eff (Effects eff)) m stM
              => MonadEff (Effects eff) m
              => SingletonFunctor stM
-             => DependenciesQueues siteQueues (Effects eff)
-             -> (siteQueues -> SparrowClientT (Effects eff) m Unit)
+             => DependenciesQueues (Effects eff)
              -> SparrowClientT (Effects eff) m Unit
-dependencies {authTokenQueues,validateQueues,commonQueues,siteQueues} deps = do
+             -> SparrowClientT (Effects eff) m Unit
+dependencies {authTokenQueues,validateQueues,commonQueues} deps = do
   authTokenDependencies authTokenQueues
   validateDependencies validateQueues
   commonDependencies commonQueues
-  deps siteQueues
+  deps
