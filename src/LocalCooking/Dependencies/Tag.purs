@@ -117,23 +117,30 @@ tagDependencies
 
 
 
+type TagSearch eff =
+  { searchChefTags       :: String -> Eff eff Unit
+  , searchCultureTags    :: String -> Eff eff Unit
+  , searchDietTags       :: String -> Eff eff Unit
+  , searchFarmTags       :: String -> Eff eff Unit
+  , searchIngredientTags :: String -> Eff eff Unit
+  , searchMealTags       :: String -> Eff eff Unit
+  }
+
+
+type TagSearchResults eff =
+  { onChefTagSearchResult       :: Array ChefTag       -> Eff eff Unit
+  , onCultureTagSearchResult    :: Array CultureTag    -> Eff eff Unit
+  , onDietTagSearchResult       :: Array DietTag       -> Eff eff Unit
+  , onFarmTagSearchResult       :: Array FarmTag       -> Eff eff Unit
+  , onIngredientTagSearchResult :: Array IngredientTag -> Eff eff Unit
+  , onMealTagSearchResult       :: Array MealTag       -> Eff eff Unit
+  }
+
+
 mountTagSearchQueues :: forall eff
                       . TagQueues (Effects eff)
-                     -> { onChefTagSearchResult       :: Array ChefTag       -> Eff (Effects eff) Unit
-                        , onCultureTagSearchResult    :: Array CultureTag    -> Eff (Effects eff) Unit
-                        , onDietTagSearchResult       :: Array DietTag       -> Eff (Effects eff) Unit
-                        , onFarmTagSearchResult       :: Array FarmTag       -> Eff (Effects eff) Unit
-                        , onIngredientTagSearchResult :: Array IngredientTag -> Eff (Effects eff) Unit
-                        , onMealTagSearchResult       :: Array MealTag       -> Eff (Effects eff) Unit
-                        }
-                     -> Eff (Effects eff)
-                          { searchChefTags       :: String -> Eff (Effects eff) Unit
-                          , searchCultureTags    :: String -> Eff (Effects eff) Unit
-                          , searchDietTags       :: String -> Eff (Effects eff) Unit
-                          , searchFarmTags       :: String -> Eff (Effects eff) Unit
-                          , searchIngredientTags :: String -> Eff (Effects eff) Unit
-                          , searchMealTags       :: String -> Eff (Effects eff) Unit
-                          }
+                     -> TagSearchResults (Effects eff)
+                     -> Eff (Effects eff) (TagSearch (Effects eff))
 mountTagSearchQueues
   tagQueues
   { onChefTagSearchResult
