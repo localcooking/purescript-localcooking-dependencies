@@ -38,35 +38,35 @@ type Effects eff =
 
 
 type TagQueues eff =
-  { searchChefTagsQueues :: SearchChefTagsSparrowClientQueues eff
-  , searchCultureTagsQueues :: SearchCultureTagsSparrowClientQueues eff
-  , searchDietTagsQueues :: SearchDietTagsSparrowClientQueues eff
-  , searchFarmTagsQueues :: SearchFarmTagsSparrowClientQueues eff
-  , searchIngredientTagsQueues :: SearchIngredientTagsSparrowClientQueues eff
-  , searchMealTagsQueues :: SearchMealTagsSparrowClientQueues eff
-  , submitChefTagQueues :: SubmitChefTagSparrowClientQueues eff
-  , submitCultureTagQueues :: SubmitCultureTagSparrowClientQueues eff
-  , submitDietTagQueues :: SubmitDietTagSparrowClientQueues eff
-  , submitFarmTagQueues :: SubmitFarmTagSparrowClientQueues eff
-  , submitIngredientTagQueues :: SubmitIngredientTagSparrowClientQueues eff
-  , submitMealTagQueues :: SubmitMealTagSparrowClientQueues eff
+  { searchChefTagsQueues       :: SearchTagsSparrowClientQueues eff ChefTag
+  , searchCultureTagsQueues    :: SearchTagsSparrowClientQueues eff CultureTag
+  , searchDietTagsQueues       :: SearchTagsSparrowClientQueues eff DietTag 
+  , searchFarmTagsQueues       :: SearchTagsSparrowClientQueues eff FarmTag
+  , searchIngredientTagsQueues :: SearchTagsSparrowClientQueues eff IngredientTag
+  , searchMealTagsQueues       :: SearchTagsSparrowClientQueues eff MealTag
+  , submitChefTagQueues        :: SubmitTagSparrowClientQueues eff ChefTag
+  , submitCultureTagQueues     :: SubmitTagSparrowClientQueues eff CultureTag
+  , submitDietTagQueues        :: SubmitTagSparrowClientQueues eff DietTag
+  , submitFarmTagQueues        :: SubmitTagSparrowClientQueues eff FarmTag
+  , submitIngredientTagQueues  :: SubmitTagSparrowClientQueues eff IngredientTag
+  , submitMealTagQueues        :: SubmitTagSparrowClientQueues eff MealTag
   }
 
 
 newTagQueues :: forall eff. Eff (Effects eff) (TagQueues (Effects eff))
 newTagQueues = do
-  searchChefTagsQueues <- newSparrowClientQueues
-  searchCultureTagsQueues <- newSparrowClientQueues
-  searchDietTagsQueues <- newSparrowClientQueues
-  searchFarmTagsQueues <- newSparrowClientQueues
+  searchChefTagsQueues       <- newSparrowClientQueues
+  searchCultureTagsQueues    <- newSparrowClientQueues
+  searchDietTagsQueues       <- newSparrowClientQueues
+  searchFarmTagsQueues       <- newSparrowClientQueues
   searchIngredientTagsQueues <- newSparrowClientQueues
-  searchMealTagsQueues <- newSparrowClientQueues
-  submitChefTagQueues <- newSparrowStaticClientQueues
-  submitCultureTagQueues <- newSparrowStaticClientQueues
-  submitDietTagQueues <- newSparrowStaticClientQueues
-  submitFarmTagQueues <- newSparrowStaticClientQueues
-  submitIngredientTagQueues <- newSparrowStaticClientQueues
-  submitMealTagQueues <- newSparrowStaticClientQueues
+  searchMealTagsQueues       <- newSparrowClientQueues
+  submitChefTagQueues        <- newSparrowStaticClientQueues
+  submitCultureTagQueues     <- newSparrowStaticClientQueues
+  submitDietTagQueues        <- newSparrowStaticClientQueues
+  submitFarmTagQueues        <- newSparrowStaticClientQueues
+  submitIngredientTagQueues  <- newSparrowStaticClientQueues
+  submitMealTagQueues        <- newSparrowStaticClientQueues
   pure
     { searchChefTagsQueues
     , searchCultureTagsQueues
@@ -170,7 +170,7 @@ mountTagSearchQueues
   where
     mountOne :: forall tag
               . (Array tag -> Eff (Effects eff) Unit)
-             -> SparrowClientQueues (Effects eff) JSONUnit JSONUnit String (Maybe (Array tag))
+             -> SearchTagsSparrowClientQueues (Effects eff) tag
              -> Eff (Effects eff) (String -> Eff (Effects eff) Unit)
     mountOne onResult queues = do
       deltaInQueue <- writeOnly <$> One.newQueue
@@ -193,38 +193,10 @@ mountTagSearchQueues
 
 
 
-type SearchChefTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array ChefTag))
+-- FIXME encode input delta with "continue" for more results, and align with Sphinx
+type SearchTagsSparrowClientQueues eff tag =
+  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array tag))
 
-type SearchCultureTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array CultureTag))
 
-type SearchDietTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array DietTag))
-
-type SearchFarmTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array FarmTag))
-
-type SearchIngredientTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array IngredientTag))
-
-type SearchMealTagsSparrowClientQueues eff =
-  SparrowClientQueues eff JSONUnit JSONUnit String (Maybe (Array MealTag))
-
-type SubmitChefTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken ChefTag) JSONUnit
-
-type SubmitCultureTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken CultureTag) JSONUnit
-
-type SubmitDietTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken DietTag) JSONUnit
-
-type SubmitFarmTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken FarmTag) JSONUnit
-
-type SubmitIngredientTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken IngredientTag) JSONUnit
-
-type SubmitMealTagSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken MealTag) JSONUnit
+type SubmitTagSparrowClientQueues eff tag =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken tag) JSONUnit
