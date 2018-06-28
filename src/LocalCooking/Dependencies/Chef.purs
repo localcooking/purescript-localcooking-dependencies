@@ -14,8 +14,6 @@ import Sparrow.Types (Topic (..))
 
 import Prelude
 import Data.Argonaut.JSONUnit (JSONUnit)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
-import Data.Generic (class Generic)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
