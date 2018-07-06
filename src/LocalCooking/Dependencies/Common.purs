@@ -18,6 +18,7 @@ import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Alternative ((<|>))
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
@@ -29,6 +30,7 @@ import Test.QuickCheck.Gen as QC
 type Effects eff =
   ( ref :: REF
   , exception :: EXCEPTION
+  , console :: CONSOLE
   | eff)
 
 
