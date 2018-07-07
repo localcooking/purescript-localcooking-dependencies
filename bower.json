@@ -8,7 +8,7 @@
   ],
   "dependencies": {
     "purescript-localcooking-shared": "git@git.localcooking.com:localcooking/purescript-localcooking-shared.git#cfdd55d1f5f63cadacbbc5eb3ead2e3954c32b94",
-    "purescript-sparrow-queue": "git@git.localcooking.com:tooling/purescript-sparrow-queue.git#c7d88fe3bd1a7819b4911f87ab293a2022c466f4",
+    "purescript-sparrow-queue": "git@git.localcooking.com:tooling/purescript-sparrow-queue.git#ce0334bae8d3c0c7499b7362f3523e467cfb5f4e",
     "purescript-prelude": "^3.1.1",
     "purescript-console": "^3.0.0"
   },
