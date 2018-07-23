@@ -73,10 +73,10 @@ blogDependencies
 
 
 type GetBlogPostsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredBlogPostCategoryId (Array StoredBlogPostId)
+  SparrowStaticClientQueues eff Permalink (Array StoredBlogPostId)
 
 type GetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (WithId StoredBlogPostCategoryId Permalink) GetBlogPost
+  SparrowStaticClientQueues eff (WithId Permalink Permalink) GetBlogPost
 
 type NewBlogPostSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken NewBlogPost) StoredBlogPostId
