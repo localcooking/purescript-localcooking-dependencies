@@ -3,8 +3,9 @@ module LocalCooking.Dependencies.Content where
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Common (WithId)
-import LocalCooking.Semantics.Content (GetEditor, SetEditor, GetRecordSubmissionPolicy, GetRecordSubmission)
-import LocalCooking.Semantics.ContentRecord (ContentRecordVariant)
+import LocalCooking.Semantics.Content (SetEditor, GetRecordSubmissionPolicy)
+import LocalCooking.Semantics.Content.Approval (GetEditor, GetRecordSubmission)
+import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Database.Schema (StoredRecordSubmissionId)
 
 import Sparrow.Client (unpackClient)

@@ -4,7 +4,7 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Chef
-  ( GetSetChef, MenuSettings, MealSettings)
+  ( SetChef, ChefValid, MenuSettings, MealSettings)
 import LocalCooking.Database.Schema (StoredChefId, StoredMealId, StoredMenuId)
 
 import Sparrow.Client (unpackClient)
@@ -93,11 +93,11 @@ chefDependencies
 
 
 type GetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) GetSetChef
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) ChefValid
 
 
 type SetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken GetSetChef) StoredChefId
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetChef) StoredChefId
 
 
 type GetMenusSparrowClientQueues eff =

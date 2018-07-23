@@ -4,8 +4,8 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Blog
-  (GetBlogPost, NewBlogPost, SetBlogPost, BlogPostSynopsis)
-import LocalCooking.Database.Schema (StoredBlogPostId)
+  (GetBlogPost, NewBlogPost, SetBlogPost)
+import LocalCooking.Database.Schema (StoredBlogPostId, StoredBlogPostCategoryId)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -73,13 +73,13 @@ blogDependencies
 
 
 type GetBlogPostsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff JSONUnit (Array (WithId StoredBlogPostId BlogPostSynopsis))
+  SparrowStaticClientQueues eff StoredBlogPostCategoryId (Array StoredBlogPostId)
 
 type GetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff Permalink GetBlogPost
+  SparrowStaticClientQueues eff (WithId StoredBlogPostCategoryId Permalink) GetBlogPost
 
 type NewBlogPostSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken NewBlogPost) StoredBlogPostId
 
 type SetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredBlogPostId SetBlogPost)) JSONUnit
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetBlogPost) JSONUnit

@@ -3,7 +3,7 @@ module LocalCooking.Dependencies.Admin where
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Database.Schema (StoredEditorId)
-import LocalCooking.Semantics.ContentRecord (ContentRecordVariant)
+import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Semantics.Common (User, WithId)
 import LocalCooking.Semantics.Admin
   (SetUser, NewUser, GetSetSubmissionPolicy)

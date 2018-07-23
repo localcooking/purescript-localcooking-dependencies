@@ -4,8 +4,8 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.Rating (Rating)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Mitch
-  ( GetSetCustomer, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
-  , Review, CartEntry, Order)
+  ( SetCustomer, CustomerValid, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
+  , Review, CartEntry, Order, SubmitReview)
 import LocalCooking.Database.Schema
   ( StoredOrderId, StoredReviewId, StoredMealId, StoredMenuId, StoredChefId)
 
@@ -52,7 +52,6 @@ type MitchQueues eff =
   , getAllergiesQueues :: GetAllergiesSparrowClientQueues eff
   , submitReviewQueues :: SubmitReviewSparrowClientQueues eff
   , getReviewQueues :: GetReviewSparrowClientQueues eff
-  , getMealSynopsisQueues :: GetMealSynopsisSparrowClientQueues eff
   , getChefSynopsisQueues :: GetChefSynopsisSparrowClientQueues eff
   , getChefMenuSynopsesQueues :: GetChefMenuSynopsesSparrowClientQueues eff
   , getMenuMealSynopsesQueues :: GetMenuMealSynopsesSparrowClientQueues eff
@@ -75,7 +74,6 @@ newMitchQueues = do
   getAllergiesQueues <- newSparrowStaticClientQueues
   submitReviewQueues <- newSparrowStaticClientQueues
   getReviewQueues <- newSparrowStaticClientQueues
-  getMealSynopsisQueues <- newSparrowStaticClientQueues
   getChefSynopsisQueues <- newSparrowStaticClientQueues
   getChefMenuSynopsesQueues <- newSparrowStaticClientQueues
   getMenuMealSynopsesQueues <- newSparrowStaticClientQueues
@@ -94,7 +92,6 @@ newMitchQueues = do
     , getAllergiesQueues
     , submitReviewQueues
     , getReviewQueues
-    , getMealSynopsisQueues
     , getChefSynopsisQueues
     , getChefMenuSynopsesQueues
     , getMenuMealSynopsesQueues
@@ -122,7 +119,6 @@ mitchDependencies
   , getAllergiesQueues
   , submitReviewQueues
   , getReviewQueues
-  , getMealSynopsisQueues
   , getChefSynopsisQueues
   , getChefMenuSynopsesQueues
   , getMenuMealSynopsesQueues
@@ -141,7 +137,6 @@ mitchDependencies
   unpackClient (Topic ["mitch","getAllergies"]) (sparrowStaticClientQueues getAllergiesQueues)
   unpackClient (Topic ["mitch","submitReview"]) (sparrowStaticClientQueues submitReviewQueues)
   unpackClient (Topic ["mitch","getReview"]) (sparrowStaticClientQueues getReviewQueues)
-  unpackClient (Topic ["mitch","getMealSynopsis"]) (sparrowStaticClientQueues getMealSynopsisQueues)
   unpackClient (Topic ["mitch","getChefSynopsis"]) (sparrowStaticClientQueues getChefSynopsisQueues)
   unpackClient (Topic ["mitch","getChefMenuSynopses"]) (sparrowStaticClientQueues getChefMenuSynopsesQueues)
   unpackClient (Topic ["mitch","getMenuMealSynopses"]) (sparrowStaticClientQueues getMenuMealSynopsesQueues)
@@ -154,10 +149,10 @@ mitchDependencies
 
 
 type SetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken GetSetCustomer) JSONUnit
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetCustomer) JSONUnit
 
 type GetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) GetSetCustomer
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) CustomerValid
 
 
 type SetDietsSparrowClientQueues eff =
@@ -174,60 +169,12 @@ type GetAllergiesSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Allergies
 
 
-newtype SubmitReview = SubmitReview
-  { order :: StoredOrderId
-  , rating :: Rating
-  , heading :: String
-  , body :: MarkdownText
-  , images :: Array ImageSource
-  }
-
-derive instance genericSubmitReview :: Generic SubmitReview
-
-instance eqSubmitReview :: Eq SubmitReview where
-  eq = gEq
-
-instance showSubmitReview :: Show SubmitReview where
-  show = gShow
-
-instance arbitrarySubmitReview :: Arbitrary SubmitReview where
-  arbitrary = do
-    order <- arbitrary
-    rating <- arbitrary
-    heading <- arbitrary
-    body <- arbitrary
-    images <- arbitrary
-    pure (SubmitReview {order,rating,heading,body,images})
-
-instance encodeJsonSubmitReview :: EncodeJson SubmitReview where
-  encodeJson (SubmitReview {order,rating,heading,body,images})
-    =  "order" := order
-    ~> "rating" := rating
-    ~> "heading" := heading
-    ~> "body" := body
-    ~> "images" := images
-    ~> jsonEmptyObject
-
-instance decodeJsonSubmitReview :: DecodeJson SubmitReview where
-  decodeJson json = do
-    o <- decodeJson json
-    order <- o .? "order"
-    rating <- o .? "rating"
-    heading <- o .? "heading"
-    body <- o .? "body"
-    images <- o .? "images"
-    pure (SubmitReview {order,rating,heading,body,images})
-
 type SubmitReviewSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken SubmitReview) StoredReviewId
 
 
 type GetReviewSparrowClientQueues eff =
   SparrowStaticClientQueues eff StoredReviewId Review
-
-
-type GetMealSynopsisSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredMealId MealSynopsis
 
 
 type GetChefSynopsisSparrowClientQueues eff =
