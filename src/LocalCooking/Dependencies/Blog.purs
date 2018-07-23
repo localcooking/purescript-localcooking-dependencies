@@ -4,7 +4,8 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Blog
-  (GetBlogPost, NewBlogPost, SetBlogPost)
+  ( GetBlogPost, NewBlogPost, SetBlogPost, BlogPostSynopsis
+  , GetBlogPostCategory, NewBlogPostCategory, SetBlogPostCategory, BlogPostCategorySynopsis)
 import LocalCooking.Database.Schema (StoredBlogPostId, StoredBlogPostCategoryId)
 
 import Sparrow.Client (unpackClient)
@@ -33,7 +34,11 @@ type Effects eff =
 
 
 type BlogQueues eff =
-  { getBlogPostQueues :: GetBlogPostSparrowClientQueues eff
+  { getBlogPostCategoryQueues :: GetBlogPostCategorySparrowClientQueues eff
+  , newBlogPostCategoryQueues :: NewBlogPostCategorySparrowClientQueues eff
+  , setBlogPostCategoryQueues :: SetBlogPostCategorySparrowClientQueues eff
+  , getBlogPostCategoriesQueues :: GetBlogPostCategoriesSparrowClientQueues eff
+  , getBlogPostQueues :: GetBlogPostSparrowClientQueues eff
   , newBlogPostQueues :: NewBlogPostSparrowClientQueues eff
   , setBlogPostQueues :: SetBlogPostSparrowClientQueues eff
   , getBlogPostsQueues :: GetBlogPostsSparrowClientQueues eff
@@ -42,12 +47,20 @@ type BlogQueues eff =
 
 newBlogQueues :: forall eff. Eff (Effects eff) (BlogQueues (Effects eff))
 newBlogQueues = do
+  getBlogPostCategoryQueues <- newSparrowStaticClientQueues
+  newBlogPostCategoryQueues <- newSparrowStaticClientQueues
+  setBlogPostCategoryQueues <- newSparrowStaticClientQueues
+  getBlogPostCategoriesQueues <- newSparrowStaticClientQueues
   getBlogPostQueues <- newSparrowStaticClientQueues
   newBlogPostQueues <- newSparrowStaticClientQueues
   setBlogPostQueues <- newSparrowStaticClientQueues
   getBlogPostsQueues <- newSparrowStaticClientQueues
   pure
-    { getBlogPostQueues
+    { getBlogPostCategoryQueues
+    , newBlogPostCategoryQueues
+    , setBlogPostCategoryQueues
+    , getBlogPostCategoriesQueues
+    , getBlogPostQueues
     , newBlogPostQueues
     , setBlogPostQueues
     , getBlogPostsQueues
@@ -61,19 +74,40 @@ blogDependencies :: forall eff stM m
                      => BlogQueues (Effects eff)
                      -> SparrowClientT (Effects eff) m Unit
 blogDependencies
-  { getBlogPostQueues
+  { getBlogPostCategoryQueues
+  , newBlogPostCategoryQueues
+  , setBlogPostCategoryQueues
+  , getBlogPostCategoriesQueues
+  , getBlogPostQueues
   , newBlogPostQueues
   , setBlogPostQueues
   , getBlogPostsQueues
   } = do
+  unpackClient (Topic ["blog","getBlogPostCategory"]) (sparrowStaticClientQueues getBlogPostCategoryQueues)
+  unpackClient (Topic ["blog","newBlogPostCategory"]) (sparrowStaticClientQueues newBlogPostCategoryQueues)
+  unpackClient (Topic ["blog","setBlogPostCategory"]) (sparrowStaticClientQueues setBlogPostCategoryQueues)
+  unpackClient (Topic ["blog","getBlogPostCategories"]) (sparrowStaticClientQueues getBlogPostCategoriesQueues)
   unpackClient (Topic ["blog","getBlogPost"]) (sparrowStaticClientQueues getBlogPostQueues)
   unpackClient (Topic ["blog","newBlogPost"]) (sparrowStaticClientQueues newBlogPostQueues)
   unpackClient (Topic ["blog","setBlogPost"]) (sparrowStaticClientQueues setBlogPostQueues)
   unpackClient (Topic ["blog","getBlogPosts"]) (sparrowStaticClientQueues getBlogPostsQueues)
 
 
+type GetBlogPostCategoriesSparrowClientQueues eff =
+  SparrowStaticClientQueues eff JSONUnit (Array BlogPostCategorySynopsis)
+
+type GetBlogPostCategorySparrowClientQueues eff =
+  SparrowStaticClientQueues eff Permalink GetBlogPostCategory
+
+type NewBlogPostCategorySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken NewBlogPostCategory) StoredBlogPostCategoryId
+
+type SetBlogPostCategorySparrowClientQueues eff =
+  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetBlogPostCategory) JSONUnit
+
+
 type GetBlogPostsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff Permalink (Array StoredBlogPostId)
+  SparrowStaticClientQueues eff Permalink (Array BlogPostSynopsis)
 
 type GetBlogPostSparrowClientQueues eff =
   SparrowStaticClientQueues eff (WithId Permalink Permalink) GetBlogPost
