@@ -2,6 +2,7 @@ module LocalCooking.Dependencies.Blog where
 
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
+import LocalCooking.Common.Blog (BlogPostVariant)
 import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Blog
   ( GetBlogPost, NewBlogPost, SetBlogPost, BlogPostSynopsis
@@ -94,10 +95,10 @@ blogDependencies
 
 
 type GetBlogPostCategoriesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff JSONUnit (Array BlogPostCategorySynopsis)
+  SparrowStaticClientQueues eff BlogPostVariant (Array BlogPostCategorySynopsis)
 
 type GetBlogPostCategorySparrowClientQueues eff =
-  SparrowStaticClientQueues eff Permalink GetBlogPostCategory
+  SparrowStaticClientQueues eff (WithId BlogPostVariant Permalink) GetBlogPostCategory
 
 type NewBlogPostCategorySparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken NewBlogPostCategory) StoredBlogPostCategoryId
@@ -107,10 +108,10 @@ type SetBlogPostCategorySparrowClientQueues eff =
 
 
 type GetBlogPostsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff Permalink (Array BlogPostSynopsis)
+  SparrowStaticClientQueues eff (WithId BlogPostVariant Permalink) (Array BlogPostSynopsis)
 
 type GetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (WithId Permalink Permalink) GetBlogPost
+  SparrowStaticClientQueues eff (WithId BlogPostVariant (WithId Permalink Permalink)) GetBlogPost
 
 type NewBlogPostSparrowClientQueues eff =
   SparrowStaticClientQueues eff (AccessInitIn AuthToken NewBlogPost) StoredBlogPostId
