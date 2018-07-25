@@ -1,12 +1,11 @@
 module LocalCooking.Dependencies.Mitch where
 
-import LocalCooking.Common.Rating (Rating)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Mitch
   ( SetCustomer, CustomerValid, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
   , Review, CartEntry, Order, SubmitReview)
 import LocalCooking.Database.Schema
-  ( StoredOrderId, StoredReviewId, StoredMealId, StoredMenuId, StoredChefId)
+  (StoredReviewId, StoredMenuId, StoredChefId)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -16,11 +15,9 @@ import Sparrow.Client.Queue
 import Sparrow.Types (Topic (..))
 
 import Prelude
-import Data.Image.Source (ImageSource)
 import Data.Date (Date)
 import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
-import Data.String.Markdown (MarkdownText)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
