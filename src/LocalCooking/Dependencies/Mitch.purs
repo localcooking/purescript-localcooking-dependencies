@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Mitch where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.Rating (Rating)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Mitch
@@ -23,6 +22,7 @@ import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.String.Markdown (MarkdownText)
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Functor.Singleton (class SingletonFunctor)
@@ -149,28 +149,28 @@ mitchDependencies
 
 
 type SetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetCustomer) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetCustomer) JSONUnit
 
 type GetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) CustomerValid
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) CustomerValid
 
 
 type SetDietsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken Diets) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken Diets) JSONUnit
 
 type GetDietsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Diets
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Diets
 
 
 type SetAllergiesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken Allergies) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken Allergies) JSONUnit
 
 type GetAllergiesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) Allergies
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Allergies
 
 
 type SubmitReviewSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SubmitReview) StoredReviewId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SubmitReview) StoredReviewId
 
 
 type GetReviewSparrowClientQueues eff =
@@ -275,7 +275,7 @@ type BrowseMealSparrowClientQueues eff =
 
 
 type GetCartSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) (Array CartEntry)
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array CartEntry)
 
 
 newtype AddToCart = AddToCart
@@ -320,8 +320,8 @@ instance decodeJsonAddToCart :: DecodeJson AddToCart where
 
 
 type AddToCartSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken AddToCart) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) JSONUnit
 
 
 type GetOrdersSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken AddToCart) (Array Order)
+  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) (Array Order)

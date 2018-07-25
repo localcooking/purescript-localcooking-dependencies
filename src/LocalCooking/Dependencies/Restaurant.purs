@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Restaurant where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Meal (MealTag)
 -- import LocalCooking.Common.Tag.Restaurant (RestaurantTag)

@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Validate where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.User.Password (HashedPassword)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 
@@ -14,6 +13,7 @@ import Data.Date (Date)
 import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Functor.Singleton (class SingletonFunctor)
@@ -167,7 +167,7 @@ type UniqueMealPermalinkSparrowClientQueues eff =
 
 
 type PasswordVerifySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken HashedPassword) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken HashedPassword) JSONUnit
 
 
 newtype PasswordVerifyUnauth = PasswordVerifyUnauth

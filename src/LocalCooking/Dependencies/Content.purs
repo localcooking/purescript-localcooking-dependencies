@@ -1,8 +1,6 @@
 module LocalCooking.Dependencies.Content where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Content (SetEditor, GetRecordSubmissionPolicy)
 import LocalCooking.Semantics.Content.Approval (GetEditor, GetRecordSubmission)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
@@ -15,6 +13,7 @@ import Sparrow.Types (Topic (..))
 
 import Prelude
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff, kind Effect)
@@ -79,16 +78,16 @@ contentDependencies
 
 
 type GetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) GetEditor
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) GetEditor
 
 type SetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetEditor) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetEditor) JSONUnit
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) GetRecordSubmissionPolicy
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) GetRecordSubmissionPolicy
 
 type ApproveSubmissionSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken StoredRecordSubmissionId) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredRecordSubmissionId) JSONUnit
 
 type GetSubmissionsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) (Array (WithId StoredRecordSubmissionId GetRecordSubmission))
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (Array (JSONTuple StoredRecordSubmissionId GetRecordSubmission))

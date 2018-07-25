@@ -1,10 +1,9 @@
 module LocalCooking.Dependencies.Admin where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Database.Schema (StoredEditorId)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
-import LocalCooking.Semantics.Common (User, WithId)
+import LocalCooking.Semantics.Common (User)
 import LocalCooking.Semantics.Admin
   (SetUser, NewUser, GetSetSubmissionPolicy)
 
@@ -15,6 +14,7 @@ import Sparrow.Types (Topic (..))
 
 import Prelude
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
@@ -82,24 +82,24 @@ adminDependencies
 
 
 type GetUsersSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) (Array User)
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array User)
 
 
 type SetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetUser) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetUser) JSONUnit
 
 
 type NewUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken NewUser) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken NewUser) JSONUnit
 
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken ContentRecordVariant) GetSetSubmissionPolicy
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) GetSetSubmissionPolicy
 
 
 type SetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken GetSetSubmissionPolicy) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken GetSetSubmissionPolicy) JSONUnit
 
 
 type AssignSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredEditorId ContentRecordVariant)) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredEditorId ContentRecordVariant)) JSONUnit

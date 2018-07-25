@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Common where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Semantics.Common (Register, RegisterError, User, SetUser)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 
@@ -14,6 +13,7 @@ import Data.NonEmpty (NonEmpty (..))
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Argonaut (class EncodeJson, class DecodeJson, encodeJson, decodeJson, (:=), (~>), jsonEmptyObject, (.?), fail)
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Alternative ((<|>))
 import Control.Monad.Trans.Control (class MonadBaseControl)
@@ -65,7 +65,7 @@ commonDependencies
 
 
 
-newtype UserInitIn = UserInitIn (AccessInitIn AuthToken JSONUnit)
+newtype UserInitIn = UserInitIn (JSONTuple AuthToken JSONUnit)
 
 derive instance genericUserInitIn :: Generic UserInitIn
 derive newtype instance eqUserInitIn :: Eq UserInitIn

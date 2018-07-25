@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Tag where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Chef (ChefTag)
 import LocalCooking.Common.Tag.Culture (CultureTag)
@@ -20,6 +19,7 @@ import Sparrow.Types (Topic (..))
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Argonaut.JSONUnit (JSONUnit (..))
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff, kind Effect)
@@ -201,4 +201,4 @@ type SearchTagsSparrowClientQueues eff tag =
 
 
 type SubmitTagSparrowClientQueues eff tag =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken tag) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken tag) JSONUnit

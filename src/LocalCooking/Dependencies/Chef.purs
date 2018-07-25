@@ -1,8 +1,6 @@
 module LocalCooking.Dependencies.Chef where
 
-import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Semantics.Common (WithId)
 import LocalCooking.Semantics.Chef
   ( SetChef, ChefValid, MenuSettings, MealSettings)
 import LocalCooking.Database.Schema (StoredChefId, StoredMealId, StoredMenuId)
@@ -14,6 +12,7 @@ import Sparrow.Types (Topic (..))
 
 import Prelude
 import Data.Argonaut.JSONUnit (JSONUnit)
+import Data.Argonaut.JSONTuple (JSONTuple)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
@@ -93,32 +92,32 @@ chefDependencies
 
 
 type GetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) ChefValid
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) ChefValid
 
 
 type SetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken SetChef) StoredChefId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetChef) StoredChefId
 
 
 type GetMenusSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken JSONUnit) (Array (WithId StoredMenuId MenuSettings))
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array (JSONTuple StoredMenuId MenuSettings))
 
 
 type NewMenuSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken MenuSettings) StoredMenuId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken MenuSettings) StoredMenuId
 
 
 type SetMenuSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredMenuId MenuSettings)) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MenuSettings)) JSONUnit
 
 
 type GetMealsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken StoredMenuId) (Array (WithId StoredMealId MealSettings))
+  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredMenuId) (Array (JSONTuple StoredMealId MealSettings))
 
 
 type NewMealSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredMenuId MealSettings)) StoredMealId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MealSettings)) StoredMealId
 
 
 type SetMealSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (AccessInitIn AuthToken (WithId StoredMenuId (WithId StoredMealId MealSettings))) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId (JSONTuple StoredMealId MealSettings))) JSONUnit
