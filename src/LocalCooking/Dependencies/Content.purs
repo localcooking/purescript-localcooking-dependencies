@@ -1,7 +1,10 @@
 module LocalCooking.Dependencies.Content where
 
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
-import LocalCooking.Semantics.Content (SetEditor, GetRecordSubmissionPolicy)
+import LocalCooking.Semantics.User (UserExists, HasRole)
+import LocalCooking.Semantics.Content
+  ( SetEditor, GetRecordSubmissionPolicy
+  , EditorExists, SubmissionExists, SubmissionPolicy)
 import LocalCooking.Semantics.Content.Approval (GetEditor, GetRecordSubmission)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Database.Schema (StoredRecordSubmissionId)
@@ -78,16 +81,16 @@ contentDependencies
 
 
 type GetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) GetEditor
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (EditorExists GetEditor)))
 
 type SetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetEditor) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetEditor) (UserExists (HasRole JSONUnit))
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) GetRecordSubmissionPolicy
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicy GetRecordSubmissionPolicy)))
 
 type ApproveSubmissionSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredRecordSubmissionId) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredRecordSubmissionId) (UserExists (HasRole (EditorExists (SubmissionExists (SubmissionPolicy JSONUnit)))))
 
 type GetSubmissionsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (Array (JSONTuple StoredRecordSubmissionId GetRecordSubmission))
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (Array (JSONTuple StoredRecordSubmissionId GetRecordSubmission))))
