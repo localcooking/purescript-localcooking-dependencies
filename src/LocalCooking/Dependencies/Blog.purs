@@ -4,7 +4,11 @@ import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Blog (BlogPostVariant)
 import LocalCooking.Semantics.Blog
   ( GetBlogPost, NewBlogPost, SetBlogPost, BlogPostSynopsis
-  , GetBlogPostCategory, NewBlogPostCategory, SetBlogPostCategory, BlogPostCategorySynopsis)
+  , GetBlogPostCategory, NewBlogPostCategory, SetBlogPostCategory
+  , BlogPostCategorySynopsis, BlogPostCategoryUnique, BlogPostCategoryExists
+  , BlogPostUnique, BlogPostExists, BlogPostPrimary)
+import LocalCooking.Semantics.User (UserExists, HasRole)
+import LocalCooking.Semantics.Content (EditorExists)
 import LocalCooking.Database.Schema (StoredBlogPostId, StoredBlogPostCategoryId)
 
 import Sparrow.Client (unpackClient)
@@ -97,23 +101,23 @@ type GetBlogPostCategoriesSparrowClientQueues eff =
   SparrowStaticClientQueues eff BlogPostVariant (Array BlogPostCategorySynopsis)
 
 type GetBlogPostCategorySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant Permalink) GetBlogPostCategory
+  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant Permalink) (BlogPostCategoryUnique GetBlogPostCategory)
 
 type NewBlogPostCategorySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken NewBlogPostCategory) StoredBlogPostCategoryId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken NewBlogPostCategory) (UserExists (HasRole (BlogPostCategoryUnique StoredBlogPostCategoryId)))
 
 type SetBlogPostCategorySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetBlogPostCategory) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetBlogPostCategory) (UserExists (HasRole (BlogPostCategoryExists (BlogPostCategoryUnique JSONUnit))))
 
 
 type GetBlogPostsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant Permalink) (Array BlogPostSynopsis)
+  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant Permalink) (BlogPostCategoryUnique (Array (EditorExists BlogPostSynopsis)))
 
 type GetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant (JSONTuple Permalink Permalink)) GetBlogPost
+  SparrowStaticClientQueues eff (JSONTuple BlogPostVariant (JSONTuple Permalink Permalink)) (BlogPostCategoryUnique (BlogPostUnique (EditorExists GetBlogPost)))
 
 type NewBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken NewBlogPost) StoredBlogPostId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken NewBlogPost) (UserExists (HasRole (EditorExists (BlogPostUnique (BlogPostPrimary StoredBlogPostId)))))
 
 type SetBlogPostSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetBlogPost) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetBlogPost) (UserExists (HasRole (EditorExists (BlogPostExists (BlogPostPrimary (BlogPostUnique JSONUnit))))))

@@ -4,8 +4,9 @@ import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Database.Schema (StoredEditorId)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Semantics.Common (User)
+import LocalCooking.Semantics.User (UserExists, HasRole, UserUnique)
 import LocalCooking.Semantics.Admin
-  (SetUser, NewUser, GetSetSubmissionPolicy)
+  (SetUser, NewUser, GetSetSubmissionPolicy, SubmissionPolicyUnique)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -82,24 +83,19 @@ adminDependencies
 
 
 type GetUsersSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array User)
-
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (Array User)))
 
 type SetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetUser) JSONUnit
-
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetUser) (UserExists (HasRole JSONUnit))
 
 type NewUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken NewUser) JSONUnit
-
+  SparrowStaticClientQueues eff (JSONTuple AuthToken NewUser) (UserExists (HasRole (UserUnique JSONUnit)))
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) GetSetSubmissionPolicy
-
+  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicyUnique GetSetSubmissionPolicy)))
 
 type SetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken GetSetSubmissionPolicy) JSONUnit
-
+  SparrowStaticClientQueues eff (JSONTuple AuthToken GetSetSubmissionPolicy) (UserExists (HasRole JSONUnit))
 
 type AssignSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredEditorId ContentRecordVariant)) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredEditorId ContentRecordVariant)) (UserExists (HasRole (SubmissionPolicyUnique JSONUnit)))

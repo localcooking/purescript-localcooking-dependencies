@@ -94,30 +94,23 @@ chefDependencies
 type GetChefSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) ChefValid
 
-
 type SetChefSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken SetChef) StoredChefId
-
 
 type GetMenusSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array (JSONTuple StoredMenuId MenuSettings))
 
-
 type NewMenuSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken MenuSettings) StoredMenuId
-
 
 type SetMenuSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MenuSettings)) JSONUnit
 
-
 type GetMealsSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken StoredMenuId) (Array (JSONTuple StoredMealId MealSettings))
 
-
 type NewMealSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MealSettings)) StoredMealId
-
 
 type SetMealSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId (JSONTuple StoredMealId MealSettings))) JSONUnit

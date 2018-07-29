@@ -3,7 +3,7 @@ module LocalCooking.Dependencies.Mitch where
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.Mitch
   ( SetCustomer, CustomerValid, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
-  , Review, CartEntry, Order, SubmitReview)
+  , Review, CartEntry, Order, SubmitReview, AddToCart, BrowseMeal, BrowseMenu)
 import LocalCooking.Database.Schema
   (StoredReviewId, StoredMenuId, StoredChefId)
 
@@ -15,13 +15,9 @@ import Sparrow.Client.Queue
 import Sparrow.Types (Topic (..))
 
 import Prelude
-import Data.Date (Date)
-import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut.JSONTuple (JSONTuple)
-import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
-import Data.Generic (class Generic, gEq, gShow)
 import Data.Functor.Singleton (class SingletonFunctor)
 import Control.Monad.Trans.Control (class MonadBaseControl)
 import Control.Monad.Eff (Eff)
@@ -29,7 +25,6 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
-import Test.QuickCheck (class Arbitrary, arbitrary)
 
 
 
@@ -151,13 +146,11 @@ type SetCustomerSparrowClientQueues eff =
 type GetCustomerSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) CustomerValid
 
-
 type SetDietsSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken Diets) JSONUnit
 
 type GetDietsSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Diets
-
 
 type SetAllergiesSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken Allergies) JSONUnit
@@ -165,160 +158,35 @@ type SetAllergiesSparrowClientQueues eff =
 type GetAllergiesSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Allergies
 
-
 type SubmitReviewSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken SubmitReview) StoredReviewId
-
 
 type GetReviewSparrowClientQueues eff =
   SparrowStaticClientQueues eff StoredReviewId Review
 
-
 type GetChefSynopsisSparrowClientQueues eff =
   SparrowStaticClientQueues eff StoredChefId ChefSynopsis
-
 
 type GetChefMenuSynopsesSparrowClientQueues eff =
   SparrowStaticClientQueues eff StoredChefId (Array MenuSynopsis)
 
-
 type GetMenuMealSynopsesSparrowClientQueues eff =
   SparrowStaticClientQueues eff StoredMenuId (Array MealSynopsis)
-
 
 type BrowseChefSparrowClientQueues eff =
   SparrowStaticClientQueues eff Permalink Chef
 
-
-newtype BrowseMenu = BrowseMenu
-  { chef :: Permalink
-  , deadline :: Date
-  }
-
-derive instance genericBrowseMenu :: Generic BrowseMenu
-
-instance eqBrowseMenu :: Eq BrowseMenu where
-  eq = gEq
-
-instance showBrowseMenu :: Show BrowseMenu where
-  show = gShow
-
-
-instance arbitraryBrowseMenu :: Arbitrary BrowseMenu where
-  arbitrary = do
-    chef <- arbitrary
-    JSONDate deadline <- arbitrary
-    pure (BrowseMenu {chef,deadline})
-
-
-instance encodeJsonBrowseMenu :: EncodeJson BrowseMenu where
-  encodeJson (BrowseMenu {chef,deadline})
-    =  "chef" := chef
-    ~> "deadline" := JSONDate deadline
-    ~> jsonEmptyObject
-
-instance decodeJsonBrowseMenu :: DecodeJson BrowseMenu where
-  decodeJson json = do
-    o <- decodeJson json
-    chef <- o .? "chef"
-    JSONDate deadline <- o .? "deadline"
-    pure (BrowseMenu {chef,deadline})
-
-
 type BrowseMenuSparrowClientQueues eff =
   SparrowStaticClientQueues eff BrowseMenu Menu
-
-
-newtype BrowseMeal = BrowseMeal
-  { chef :: Permalink
-  , deadline :: Date
-  , meal :: Permalink
-  }
-
-derive instance genericBrowseMeal :: Generic BrowseMeal
-
-instance eqBrowseMeal :: Eq BrowseMeal where
-  eq = gEq
-
-instance showBrowseMeal :: Show BrowseMeal where
-  show = gShow
-
-
-instance arbitraryBrowseMeal :: Arbitrary BrowseMeal where
-  arbitrary = do
-    chef <- arbitrary
-    JSONDate deadline <- arbitrary
-    meal <- arbitrary
-    pure (BrowseMeal {chef,deadline,meal})
-
-instance encodeJsonBrowseMeal :: EncodeJson BrowseMeal where
-  encodeJson (BrowseMeal {chef,deadline,meal})
-    =  "chef" := chef
-    ~> "deadline" := JSONDate deadline
-    ~> "meal" := meal
-    ~> jsonEmptyObject
-
-instance decodeJsonBrowseMeal :: DecodeJson BrowseMeal where
-  decodeJson json = do
-    o <- decodeJson json
-    chef <- o .? "chef"
-    JSONDate deadline <- o .? "deadline"
-    meal <- o .? "meal"
-    pure (BrowseMeal {chef,deadline,meal})
-
 
 type BrowseMealSparrowClientQueues eff =
   SparrowStaticClientQueues eff BrowseMeal Meal
 
-
 type GetCartSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array CartEntry)
 
-
-newtype AddToCart = AddToCart
-  { chef :: Permalink
-  , deadline :: Date
-  , meal :: Permalink
-  , volume :: Int
-  }
-
-derive instance genericAddToCart :: Generic AddToCart
-
-instance eqAddToCart :: Eq AddToCart where
-  eq = gEq
-
-instance showAddToCart :: Show AddToCart where
-  show = gShow
-
-instance arbitraryAddToCart :: Arbitrary AddToCart where
-  arbitrary = do
-    chef <- arbitrary
-    JSONDate deadline <- arbitrary
-    meal <- arbitrary
-    volume <- arbitrary
-    pure (AddToCart {chef,deadline,meal,volume})
-
-instance encodeJsonAddToCart :: EncodeJson AddToCart where
-  encodeJson (AddToCart {chef,deadline,meal,volume})
-    =  "chef" := chef
-    ~> "deadline" := JSONDate deadline
-    ~> "meal" := meal
-    ~> "volume" := volume
-    ~> jsonEmptyObject
-
-instance decodeJsonAddToCart :: DecodeJson AddToCart where
-  decodeJson json = do
-    o <- decodeJson json
-    chef <- o .? "chef"
-    JSONDate deadline <- o .? "deadline"
-    meal <- o .? "meal"
-    volume <- o .? "volume"
-    pure (AddToCart {chef,deadline,meal,volume})
-
-
 type AddToCartSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) JSONUnit
-
 
 type GetOrdersSparrowClientQueues eff =
   SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) (Array Order)
