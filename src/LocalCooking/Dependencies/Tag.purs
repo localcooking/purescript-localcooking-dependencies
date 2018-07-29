@@ -1,5 +1,6 @@
 module LocalCooking.Dependencies.Tag where
 
+import LocalCooking.Semantics.User (UserExists)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Chef (ChefTag)
 import LocalCooking.Common.Tag.Culture (CultureTag)
@@ -201,4 +202,4 @@ type SearchTagsSparrowClientQueues eff tag =
 
 
 type SubmitTagSparrowClientQueues eff tag =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken tag) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken tag) (UserExists JSONUnit)

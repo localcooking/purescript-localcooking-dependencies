@@ -1,9 +1,13 @@
 module LocalCooking.Dependencies.Mitch where
 
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
+import LocalCooking.Semantics.User (UserExists, HasRole)
 import LocalCooking.Semantics.Mitch
   ( SetCustomer, CustomerValid, Diets, Allergies, MealSynopsis, MenuSynopsis, ChefSynopsis, Meal, Menu, Chef
-  , Review, CartEntry, Order, SubmitReview, AddToCart, BrowseMeal, BrowseMenu)
+  , Review, CartEntry, Order, SubmitReview, AddToCart, BrowseMeal, BrowseMenu
+  , CustomerExists, CustomerUnique, ReviewExists, MealExists, MenuExists
+  , MenuUnique, MealUnique, RatingExists, MenuPublished, OrderExists)
+import LocalCooking.Semantics.Chef (ChefUnique, ChefExists)
 import LocalCooking.Database.Schema
   (StoredReviewId, StoredMenuId, StoredChefId)
 
@@ -141,52 +145,69 @@ mitchDependencies
 
 
 type SetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetCustomer) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SetCustomer)
+    (UserExists JSONUnit)
 
 type GetCustomerSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) CustomerValid
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit)
+    (UserExists (CustomerExists CustomerValid))
 
 type SetDietsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken Diets) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken Diets)
+    (UserExists (CustomerUnique JSONUnit))
 
 type GetDietsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Diets
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit)
+    (UserExists (CustomerUnique (CustomerExists Diets)))
 
 type SetAllergiesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken Allergies) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken Allergies)
+    (UserExists (CustomerUnique JSONUnit))
 
 type GetAllergiesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) Allergies
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit)
+    (UserExists (CustomerUnique (CustomerExists Allergies)))
 
 type SubmitReviewSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SubmitReview) StoredReviewId
+  SparrowStaticClientQueues eff (JSONTuple AuthToken SubmitReview)
+    (UserExists (HasRole (CustomerUnique (OrderExists StoredReviewId))))
 
 type GetReviewSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredReviewId Review
+  SparrowStaticClientQueues eff StoredReviewId
+    (ReviewExists Review)
 
 type GetChefSynopsisSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredChefId ChefSynopsis
+  SparrowStaticClientQueues eff StoredChefId
+    (ChefExists (ReviewExists ChefSynopsis))
 
 type GetChefMenuSynopsesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredChefId (Array MenuSynopsis)
+  SparrowStaticClientQueues eff StoredChefId
+    (ChefExists (Array (MenuExists MenuSynopsis)))
 
 type GetMenuMealSynopsesSparrowClientQueues eff =
-  SparrowStaticClientQueues eff StoredMenuId (Array MealSynopsis)
+  SparrowStaticClientQueues eff StoredMenuId
+    (MenuExists (Array (MealExists (RatingExists MealSynopsis))))
 
 type BrowseChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff Permalink Chef
+  SparrowStaticClientQueues eff Permalink
+    (ChefUnique (ChefExists (ReviewExists Chef)))
 
 type BrowseMenuSparrowClientQueues eff =
-  SparrowStaticClientQueues eff BrowseMenu Menu
+  SparrowStaticClientQueues eff BrowseMenu
+    (ChefUnique (MenuUnique (MenuPublished (ChefExists (ReviewExists (MenuExists Menu))))))
 
 type BrowseMealSparrowClientQueues eff =
-  SparrowStaticClientQueues eff BrowseMeal Meal
+  SparrowStaticClientQueues eff BrowseMeal
+    (ChefUnique (MenuUnique (MealUnique (MealExists (RatingExists Meal)))))
 
 type GetCartSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (Array CartEntry)
+  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit)
+    (UserExists (Array CartEntry))
 
 type AddToCartSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart)
+    (UserExists (MealExists JSONUnit))
 
 type GetOrdersSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart) (Array Order)
+  SparrowStaticClientQueues eff (JSONTuple AuthToken AddToCart)
+    (UserExists (CustomerUnique (Array (MealExists (RatingExists Order)))))

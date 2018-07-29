@@ -2,6 +2,7 @@ module LocalCooking.Dependencies.Validate where
 
 import LocalCooking.Common.User.Password (HashedPassword)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
+import LocalCooking.Semantics.User (UserExists)
 import LocalCooking.Semantics.Validate
   (PasswordVerifyUnauth, IsUniqueMealPermalink, IsUniqueMenuDeadline)
 
@@ -100,7 +101,7 @@ type UniqueMealPermalinkSparrowClientQueues eff =
   SparrowStaticClientQueues eff IsUniqueMealPermalink JSONUnit
 
 type PasswordVerifySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken HashedPassword) JSONUnit
+  SparrowStaticClientQueues eff (JSONTuple AuthToken HashedPassword) (UserExists Boolean)
 
 type PasswordVerifyUnauthSparrowClientQueues eff =
-  SparrowStaticClientQueues eff PasswordVerifyUnauth JSONUnit
+  SparrowStaticClientQueues eff PasswordVerifyUnauth (UserExists Boolean)
