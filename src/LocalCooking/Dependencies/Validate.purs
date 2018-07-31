@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Validate where
 
-import LocalCooking.Common.User.Password (HashedPassword)
 import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.User (UserExists)
 import LocalCooking.Semantics.Validate
@@ -12,11 +11,12 @@ import Sparrow.Client.Queue (SparrowStaticClientQueues, sparrowStaticClientQueue
 import Sparrow.Types (Topic (..))
 
 import Prelude
+import Data.Password (HashedPassword)
 import Data.Date (Date)
-import Data.Date.JSON (JSONDate (..))
 import Data.String.Permalink (Permalink)
 import Data.Argonaut.JSONUnit (JSONUnit)
 import Data.Argonaut.JSONTuple (JSONTuple)
+import Data.Argonaut.JSONDate (JSONDate (..))
 import Data.Argonaut (class EncodeJson, class DecodeJson, (:=), (.?), (~>), jsonEmptyObject, decodeJson)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Functor.Singleton (class SingletonFunctor)
