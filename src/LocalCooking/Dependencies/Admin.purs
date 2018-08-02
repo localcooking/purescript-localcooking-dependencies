@@ -1,12 +1,12 @@
 module LocalCooking.Dependencies.Admin where
 
-import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Database.Schema (StoredEditorId)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Semantics.Common (User)
 import LocalCooking.Semantics.User (UserExists, HasRole, UserUnique)
 import LocalCooking.Semantics.Admin
   (SetUser, NewUser, GetSetSubmissionPolicy, SubmissionPolicyUnique)
+import Auth.AccessToken.Session (SessionToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -83,19 +83,19 @@ adminDependencies
 
 
 type GetUsersSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (Array User)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken JSONUnit) (UserExists (HasRole (Array User)))
 
 type SetUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetUser) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken SetUser) (UserExists (HasRole JSONUnit))
 
 type NewUserSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken NewUser) (UserExists (HasRole (UserUnique JSONUnit)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken NewUser) (UserExists (HasRole (UserUnique JSONUnit)))
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicyUnique GetSetSubmissionPolicy)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicyUnique GetSetSubmissionPolicy)))
 
 type SetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken GetSetSubmissionPolicy) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken GetSetSubmissionPolicy) (UserExists (HasRole JSONUnit))
 
 type AssignSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredEditorId ContentRecordVariant)) (UserExists (HasRole (SubmissionPolicyUnique JSONUnit)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken (JSONTuple StoredEditorId ContentRecordVariant)) (UserExists (HasRole (SubmissionPolicyUnique JSONUnit)))

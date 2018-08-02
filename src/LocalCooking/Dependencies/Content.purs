@@ -1,6 +1,5 @@
 module LocalCooking.Dependencies.Content where
 
-import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.User (UserExists, HasRole)
 import LocalCooking.Semantics.Content
   ( SetEditor, GetRecordSubmissionPolicy
@@ -8,6 +7,7 @@ import LocalCooking.Semantics.Content
 import LocalCooking.Semantics.Content.Approval (GetEditor, GetRecordSubmission)
 import LocalCooking.Semantics.ContentRecord.Variant (ContentRecordVariant)
 import LocalCooking.Database.Schema (StoredRecordSubmissionId)
+import Auth.AccessToken.Session (SessionToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -81,16 +81,16 @@ contentDependencies
 
 
 type GetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (EditorExists GetEditor)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken JSONUnit) (UserExists (HasRole (EditorExists GetEditor)))
 
 type SetEditorSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetEditor) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken SetEditor) (UserExists (HasRole JSONUnit))
 
 type GetSubmissionPolicySparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicy GetRecordSubmissionPolicy)))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken ContentRecordVariant) (UserExists (HasRole (SubmissionPolicy GetRecordSubmissionPolicy)))
 
 type ApproveSubmissionSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredRecordSubmissionId) (UserExists (HasRole (EditorExists (SubmissionExists (SubmissionPolicy JSONUnit)))))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken StoredRecordSubmissionId) (UserExists (HasRole (EditorExists (SubmissionExists (SubmissionPolicy JSONUnit)))))
 
 type GetSubmissionsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken ContentRecordVariant) (UserExists (HasRole (Array (JSONTuple StoredRecordSubmissionId GetRecordSubmission))))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken ContentRecordVariant) (UserExists (HasRole (Array (JSONTuple StoredRecordSubmissionId GetRecordSubmission))))

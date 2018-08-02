@@ -1,12 +1,12 @@
 module LocalCooking.Dependencies.Chef where
 
-import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Semantics.User (UserExists, HasRole)
 import LocalCooking.Semantics.Mitch (MenuExists, MealExists)
 import LocalCooking.Semantics.Chef
   ( SetChef, ChefValid, MenuSettings, MealSettings
   , ChefUnique, ChefExists)
 import LocalCooking.Database.Schema (StoredChefId, StoredMealId, StoredMenuId)
+import Auth.AccessToken.Session (SessionToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -95,25 +95,25 @@ chefDependencies
 
 
 type GetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (ChefUnique (ChefExists ChefValid))))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken JSONUnit) (UserExists (HasRole (ChefUnique (ChefExists ChefValid))))
 
 type SetChefSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken SetChef) (UserExists (HasRole StoredChefId))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken SetChef) (UserExists (HasRole StoredChefId))
 
 type GetMenusSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken JSONUnit) (UserExists (HasRole (ChefUnique (Array (MenuExists (JSONTuple StoredMenuId MenuSettings))))))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken JSONUnit) (UserExists (HasRole (ChefUnique (Array (MenuExists (JSONTuple StoredMenuId MenuSettings))))))
 
 type NewMenuSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken MenuSettings) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken MenuSettings) (UserExists (HasRole JSONUnit))
 
 type SetMenuSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MenuSettings)) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken (JSONTuple StoredMenuId MenuSettings)) (UserExists (HasRole JSONUnit))
 
 type GetMealsSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken StoredMenuId) (UserExists (HasRole (Array (MealExists (JSONTuple StoredMealId MealSettings)))))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken StoredMenuId) (UserExists (HasRole (Array (MealExists (JSONTuple StoredMealId MealSettings)))))
 
 type NewMealSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId MealSettings)) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken (JSONTuple StoredMenuId MealSettings)) (UserExists (HasRole JSONUnit))
 
 type SetMealSparrowClientQueues eff =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken (JSONTuple StoredMenuId (JSONTuple StoredMealId MealSettings))) (UserExists (HasRole JSONUnit))
+  SparrowStaticClientQueues eff (JSONTuple SessionToken (JSONTuple StoredMenuId (JSONTuple StoredMealId MealSettings))) (UserExists (HasRole JSONUnit))

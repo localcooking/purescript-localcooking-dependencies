@@ -1,8 +1,10 @@
 module LocalCooking.Dependencies where
 
-import LocalCooking.Dependencies.AuthToken (authTokenDependencies, AuthTokenQueues, newAuthTokenQueues)
 import LocalCooking.Dependencies.Validate (validateDependencies, ValidateQueues, newValidateQueues)
 import LocalCooking.Dependencies.Common (commonDependencies, CommonQueues, newCommonQueues)
+import LocalCooking.Semantics.Common (Login)
+import LocalCooking.Global.Error (LoginError)
+import Auth.AccessToken.Session (sessionTokenDependencies, SessionTokenQueues, newSessionTokenQueues)
 
 import Sparrow.Client.Types (SparrowClientT)
 
@@ -24,7 +26,7 @@ type Effects eff =
   | eff)
 
 type DependenciesQueues eff =
-  { authTokenQueues :: AuthTokenQueues eff
+  { sessionTokenQueues :: SessionTokenQueues Login LoginError eff
   , validateQueues :: ValidateQueues eff
   , commonQueues :: CommonQueues eff
   }
@@ -33,10 +35,10 @@ type DependenciesQueues eff =
 newQueues :: forall eff
            . Eff (Effects eff) (DependenciesQueues (Effects eff))
 newQueues = do
-  authTokenQueues <- newAuthTokenQueues
+  sessionTokenQueues <- newSessionTokenQueues
   validateQueues <- newValidateQueues
   commonQueues <- newCommonQueues
-  pure {authTokenQueues,validateQueues,commonQueues}
+  pure {sessionTokenQueues,validateQueues,commonQueues}
 
 
 dependencies :: forall eff m stM
@@ -46,8 +48,8 @@ dependencies :: forall eff m stM
              => DependenciesQueues (Effects eff)
              -> SparrowClientT (Effects eff) m Unit
              -> SparrowClientT (Effects eff) m Unit
-dependencies {authTokenQueues,validateQueues,commonQueues} deps = do
-  authTokenDependencies authTokenQueues
+dependencies {sessionTokenQueues,validateQueues,commonQueues} deps = do
+  sessionTokenDependencies sessionTokenQueues
   validateDependencies validateQueues
   commonDependencies commonQueues
   deps

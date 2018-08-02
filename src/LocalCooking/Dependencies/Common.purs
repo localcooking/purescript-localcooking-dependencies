@@ -1,7 +1,7 @@
 module LocalCooking.Dependencies.Common where
 
 import LocalCooking.Semantics.Common (Register, RegisterError, User, SetUser)
-import LocalCooking.Common.AccessToken.Auth (AuthToken)
+import Auth.AccessToken.Session (SessionToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -65,7 +65,7 @@ commonDependencies
 
 
 
-newtype UserInitIn = UserInitIn (JSONTuple AuthToken JSONUnit)
+newtype UserInitIn = UserInitIn (JSONTuple SessionToken JSONUnit)
 
 derive instance genericUserInitIn :: Generic UserInitIn
 derive newtype instance eqUserInitIn :: Eq UserInitIn

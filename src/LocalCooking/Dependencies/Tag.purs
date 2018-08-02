@@ -1,13 +1,13 @@
 module LocalCooking.Dependencies.Tag where
 
 import LocalCooking.Semantics.User (UserExists)
-import LocalCooking.Common.AccessToken.Auth (AuthToken)
 import LocalCooking.Common.Tag.Chef (ChefTag)
 import LocalCooking.Common.Tag.Culture (CultureTag)
 import LocalCooking.Common.Tag.Diet (DietTag)
 import LocalCooking.Common.Tag.Farm (FarmTag)
 import LocalCooking.Common.Tag.Ingredient (IngredientTag)
 import LocalCooking.Common.Tag.Meal (MealTag)
+import Auth.AccessToken.Session (SessionToken)
 
 import Sparrow.Client (unpackClient)
 import Sparrow.Client.Types (SparrowClientT)
@@ -202,4 +202,4 @@ type SearchTagsSparrowClientQueues eff tag =
 
 
 type SubmitTagSparrowClientQueues eff tag =
-  SparrowStaticClientQueues eff (JSONTuple AuthToken tag) (UserExists JSONUnit)
+  SparrowStaticClientQueues eff (JSONTuple SessionToken tag) (UserExists JSONUnit)
